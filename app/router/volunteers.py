@@ -10,7 +10,6 @@ from app.services.volunteer_service import (
     delete_volunteer
 )
 from app.database import get_db
-
 router = APIRouter()
 
 @router.post("/", response_model=VolunteerRead, status_code=status.HTTP_201_CREATED)
