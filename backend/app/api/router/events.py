@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List
 from sqlalchemy.orm import Session
 from app.schemas.event import EventCreate, EventRead
+from app.dependencies import  organiser_required
 from app.services.event_service import (
     create_event,
     get_all_events,
@@ -13,7 +14,7 @@ from app.database import get_db
 
 router = APIRouter()
 
-@router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED , dependencies = [Depends(organiser_required)])
 def create_event_endpoint(event_data: EventCreate, db: Session = Depends(get_db)):
     new_event = create_event(db, event_data)
     return new_event
@@ -30,14 +31,14 @@ def get_event_endpoint(event_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Event not found")
     return event
 
-@router.put("/{event_id}", response_model=EventRead)
+@router.put("/{event_id}", response_model=EventRead , dependencies = [Depends(organiser_required)])
 def update_event_endpoint(event_id: int, event_data: EventCreate, db: Session = Depends(get_db)):
     updated_event = update_event(db, event_id, event_data)
     if not updated_event:
         raise HTTPException(status_code=404, detail="Event not found")
     return updated_event
 
-@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT , dependencies = [Depends(organiser_required)])
 def delete_event_endpoint(event_id: int, db: Session = Depends(get_db)):
     if not delete_event(db, event_id):
         raise HTTPException(status_code=404, detail="Event not found")
