@@ -1,9 +1,9 @@
+# app/models/skill.py
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .user import Base
-from .volunteer import volunteer_skills
-from .event import event_required_skills
+from sqlalchemy.orm import relationship
+from app.database import Base
+from app.models.associations import volunteer_skills, event_required_skills
 
 class Skill(Base):
     __tablename__ = "skills"
@@ -14,7 +14,6 @@ class Skill(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Relationships
     volunteers = relationship("Volunteer", secondary=volunteer_skills, back_populates="skills")
     events = relationship("Event", secondary=event_required_skills, back_populates="required_skills")
 

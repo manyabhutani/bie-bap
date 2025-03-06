@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Float
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .user import Base
-from .volunteer import volunteer_events
+from app.database import Base
+from app.models.associations import volunteer_events, event_required_skills
 
 class Event(Base):
     __tablename__ = "events"
@@ -18,18 +18,10 @@ class Event(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # Relationships
     organizer = relationship("Organizer", back_populates="events")
     volunteers = relationship("Volunteer", secondary=volunteer_events, back_populates="events")
-    required_skills = relationship("Skill", secondary="event_required_skills")
+    required_skills = relationship("Skill", secondary=event_required_skills)
 
     def __repr__(self):
         return f"<Event(id={self.id}, title={self.title})>"
-
-from sqlalchemy import Table, Column, Integer, ForeignKey
-
-event_required_skills = Table(
-    "event_required_skills",
-    Base.metadata,
-    Column("event_id", Integer, ForeignKey("events.id")),
-    Column("skill_id", Integer, ForeignKey("skills.id"))
-)

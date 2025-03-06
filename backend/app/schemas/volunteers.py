@@ -1,20 +1,9 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
+from app.schemas.skill import SkillRead
 
-class SkillBase(BaseModel):
-    name: str
-    description: Optional[str] = None
 
-class SkillCreate(SkillBase):
-    pass
-
-class Skill(SkillBase):
-    id: int
-    created_at: datetime
-
-    class Config:
-        orm_mode = True
 
 class VolunteerBase(BaseModel):
     first_name: str
@@ -38,7 +27,7 @@ class Volunteer(VolunteerBase):
     user_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    skills: List[Skill] = []
+    skills: List[SkillRead] = []
 
     class Config:
         orm_mode = True
