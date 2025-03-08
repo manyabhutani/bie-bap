@@ -1,7 +1,8 @@
 #for many to many relationship between entities
 
-from sqlalchemy import Table, Column, Integer, ForeignKey
-from app.database import Base
+from sqlalchemy import Table, Column, Integer, ForeignKey , String
+from app.db.session import  Base
+
 
 volunteer_skills = Table(
     "volunteer_skills",

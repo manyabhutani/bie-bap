@@ -2,8 +2,9 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from app.database import Base
-from app.models.associations import volunteer_skills, event_required_skills
+from app.db.session import  Base
+
+from app.db.models.associations import volunteer_skills, event_required_skills
 
 class Skill(Base):
     __tablename__ = "skills"

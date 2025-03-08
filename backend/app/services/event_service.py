@@ -1,9 +1,9 @@
 
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.models.event import Event
-from app.models.skill import Skill
-from app.schemas.event import EventCreate
+from app.db.models.event import Event
+from app.db.models.skill import Skill
+from app.schemas.events import EventCreate , EventUpdate
 
 def create_event(db: Session, event_data: EventCreate) -> Event:
     new_event = Event(
@@ -52,3 +52,15 @@ def delete_event(db: Session, event_id: int) -> bool:
     db.delete(event)
     db.commit()
     return True
+
+
+def update_volunteer_status(db: Session, event_id: int, volunteer_id: int, new_status: str) -> bool:
+
+    result = db.execute(
+        volunteer_events.update()
+        .where(volunteer_events.c.event_id == event_id)
+        .where(volunteer_events.c.volunteer_id == volunteer_id)
+        .values(status=new_status)
+    )
+    db.commit()
+    return result.rowcount > 0

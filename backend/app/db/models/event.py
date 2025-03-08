@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from app.database import Base
-from app.models.associations import volunteer_events, event_required_skills
+from app.db.session import  Base
+from app.db.models.associations import volunteer_events, event_required_skills
 
 class Event(Base):
     __tablename__ = "events"

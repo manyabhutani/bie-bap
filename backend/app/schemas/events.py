@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
-from app.schemas.skill import SkillRead
+from app.schemas.skills import SkillRead
 
 
 class EventBase(BaseModel):

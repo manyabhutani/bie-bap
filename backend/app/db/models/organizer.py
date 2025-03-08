@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from app.database import Base
+from app.db.session import  Base
+
 
 class Organizer(Base):
     __tablename__ = "organizers"
