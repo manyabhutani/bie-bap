@@ -9,7 +9,7 @@ class Organizer(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
-    organizer_name = Column(String)
+    organization_name = Column(String)
     description = Column(Text, nullable=True)
     phone = Column(String)
     address = Column(String, nullable=True)
@@ -20,4 +20,4 @@ class Organizer(Base):
     events = relationship("Event", back_populates="organizer")
 
     def __repr__(self):
-        return f"<Organizer(id={self.id}, organizer_name={self.organizer_name})>"
+        return f"<Organizer(id={self.id}, organizer_name={self.organization_name})>"

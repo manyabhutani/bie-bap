@@ -1,12 +1,17 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from enum import Enum
+
+class UserRole(str, Enum):
+    organiser = "organiser"
+    volunteer = "volunteer"
 
 class UserSignup(BaseModel):
     name: str
     email: EmailStr
     password: str
     whatsapp_number: str
-    role: Optional[str] = "volunteer"
+    role: Optional[str] = UserRole.volunteer
 
 class UserLogin(BaseModel):
     email: EmailStr

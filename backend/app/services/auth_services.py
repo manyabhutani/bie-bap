@@ -12,16 +12,24 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+ALLOWED_ROLES = {"volunteer", "organiser"}
 def create_user(db: Session, user_data: UserSignup) -> User:
+    if user_data.role not in ALLOWED_ROLES:
+        raise ValueError("Invalid role provided. Must be 'volunteer' or 'organiser'.")
+
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
-        return None
+        raise ValueError("User with this email already exists.")
+    existing_user_whatsapp = db.query(User).filter(User.whatsapp_number == user_data.whatsapp_number).first()
+    if existing_user_whatsapp:
+        raise ValueError("A user with this WhatsApp number already exists.")
+
     new_user = User(
         name=user_data.name,
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
         whatsapp_number=user_data.whatsapp_number,
-        role=user_data.role  # e.g., "volunteer" or "organiser"
+        role=user_data.role
     )
     db.add(new_user)
     db.commit()
@@ -36,3 +44,11 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
 
 def get_all_users(db: Session) -> list:
     return db.query(User).all()
+
+def delete_user(db: Session , user_id : int) -> bool:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return False
+    db.delete(user)
+    db.commit()
+    return True

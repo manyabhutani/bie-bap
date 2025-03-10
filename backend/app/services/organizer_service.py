@@ -22,9 +22,6 @@ def update_organizer(db: Session, organizer_id: int, update_data: OrganizerUpdat
     return organizer
 
 def create_organizer(db: Session, organizer_data: OrganizerCreate) -> Organizer:
-    """
-    This is optional if you decide to create the profile automatically at signup.
-    """
     new_organizer = Organizer(
         user_id=organizer_data.user_id,
         organization_name=organizer_data.organization_name,

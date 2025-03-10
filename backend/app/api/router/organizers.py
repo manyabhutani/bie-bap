@@ -38,7 +38,13 @@ def create_organizer_profile(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user)
 ):
+    if current_user.role != "organiser":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Only organisers can create an organiser profile."
+        )
+
     if get_organizer_by_user_id(db, current_user.id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Organizer profile already exists")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Organizer profile already exists")
     new_organizer = create_organizer(db, organizer_data)
     return new_organizer

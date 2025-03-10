@@ -5,17 +5,17 @@ load_dotenv("app/.env")
 
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 class Settings:
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_minutes: int = 60 * 24 * 7  # 7 days
+    algorithm: str = "HS256"
 
-    # Keycloak configuration
-    KEYCLOAK_SERVER_URL = os.getenv("KEYCLOAK_SERVER_URL")
-    KEYCLOAK_REALM_NAME = os.getenv("KEYCLOAK_REALM_NAME")
-    KEYCLOAK_ADMIN_USER = os.getenv("KEYCLOAK_ADMIN_USER")
-    KEYCLOAK_ADMIN_PASSWORD = os.getenv("KEYCLOAK_ADMIN_PASSWORD")
-    KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
-    KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
-
+    class Config:
+        env_file = "app/.env"
 
 settings = Settings()
+
+
+
