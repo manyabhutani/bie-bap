@@ -130,7 +130,7 @@ const SignupPage = () => {
                         >
                             {loading ? 'Signing Up...' : 'Sign Up'}
                         </Button>
-                        <Button variant="text" onClick={() => navigate('/login')} disabled={loading}>
+                        <Button variant="text" onClick={() => navigate('/')} disabled={loading}>
                             Already have an account? Login
                         </Button>
                     </Box>

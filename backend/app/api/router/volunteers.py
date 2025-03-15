@@ -16,7 +16,7 @@ from app.auth.security import get_current_user
 router = APIRouter()
 
 @router.get("/me", response_model=VolunteerBase)
-def get_my_profile(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_my_profile(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     volunteer = get_volunteer_by_user_id(db, current_user.id)
     if not volunteer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Volunteer profile not found")

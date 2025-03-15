@@ -13,7 +13,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import AuthModel from '../../../models/authModel';
 
-// Set the background image URL using process.env.PUBLIC_URL to correctly reference the public folder
 const BG_IMAGE_URL = `${process.env.PUBLIC_URL}/fscz.jpg`;
 
 const LoginPage = () => {
@@ -28,7 +27,7 @@ const LoginPage = () => {
         setLoading(true);
         try {
             await AuthModel.login(email, password);
-            // navigate()
+            navigate('/profile')
         } catch (err) {
             setError(err.message);
         } finally {

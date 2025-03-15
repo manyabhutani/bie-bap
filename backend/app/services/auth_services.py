@@ -1,6 +1,9 @@
 
 from sqlalchemy.orm import Session
 from app.db.models.user import User
+from app.db.models.volunteer import Volunteer
+from app.db.models.organizer import Organizer
+
 from app.schemas.user import UserSignup
 from passlib.context import CryptContext
 
@@ -34,6 +37,33 @@ def create_user(db: Session, user_data: UserSignup) -> User:
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    if user_data.role == 'volunteer':
+        name_parts = user_data.name.split(" ", 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+
+        new_volunteer = Volunteer(
+            user_id=new_user.id,
+            first_name=first_name,
+            last_name=last_name,
+            phone=user_data.whatsapp_number,  # Using WhatsApp number as phone by default
+            # whatsapp_opt_in=True  # Default to opted in since they provided WhatsApp
+        )
+        db.add(new_volunteer)
+        db.commit()
+        db.refresh(new_volunteer)
+
+    elif user_data.role == 'organiser':
+        new_organizer = Organizer(
+            user_id=new_user.id,
+            organization_name=user_data.name,
+            phone=user_data.whatsapp_number
+        )
+        db.add(new_organizer)
+        db.commit()
+        db.refresh(new_organizer)
+
     return new_user
 
 def authenticate_user(db: Session, email: str, password: str) -> User:

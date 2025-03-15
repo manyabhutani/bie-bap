@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from app.schemas.user import UserSignup, UserLogin, UserRead
+from app.schemas.volunteers import VolunteerCreate
 from app.db.session import get_db
 from app.services.auth_services import create_user, authenticate_user, get_all_users
 from app.auth.security import create_access_token, create_refresh_token

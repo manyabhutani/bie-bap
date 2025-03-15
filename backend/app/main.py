@@ -1,9 +1,17 @@
 from fastapi import FastAPI
 from app.db.session import engine, Base
 from app.api.router import auth, volunteers, events , organizers
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Volunteer Management API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 Base.metadata.create_all(bind=engine)
 
 app.router.include_router(auth.router, prefix="/auth", tags=["auth"])
