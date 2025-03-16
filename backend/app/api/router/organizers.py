@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.schemas.organizers import OrganizerRead, OrganizerUpdate, OrganizerCreate
 from app.services.organizer_service import get_organizer_by_user_id, update_organizer, create_organizer
 from app.db.session import get_db
-from app.auth.security import get_current_user, organiser_required
+from app.auth.security import get_current_user, organizer_required
 
 router = APIRouter()
 
@@ -38,10 +38,10 @@ def create_organizer_profile(
         db: Session = Depends(get_db),
         current_user = Depends(get_current_user)
 ):
-    if current_user.role != "organiser":
+    if current_user.role != "organizer":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Only organisers can create an organiser profile."
+            detail="Access denied. Only organizers can create an organizer profile."
         )
 
     if get_organizer_by_user_id(db, current_user.id):

@@ -115,7 +115,7 @@ const SignupPage = () => {
                             margin="normal"
                             required
                             fullWidth
-                            label="Role (volunteer or organiser)"
+                            label="Role (volunteer or organizer)"
                             name="role"
                             value={formData.role}
                             onChange={handleChange}

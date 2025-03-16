@@ -5,16 +5,17 @@ from app.db.models.event import Event
 from app.db.models.skill import Skill
 from app.schemas.events import EventCreate , EventUpdate
 
-def create_event(db: Session, event_data: EventCreate) -> Event:
+def create_event(db: Session, event_data: EventCreate, organizer_id: int) -> Event:
     new_event = Event(
         title=event_data.title,
         description=event_data.description,
         location=event_data.location,
         start_time=event_data.start_time,
         end_time=event_data.end_time,
-        organizer_id=event_data.organizer_id,
+        organizer_id=organizer_id,
         max_volunteers=event_data.max_volunteers
     )
+
     db.add(new_event)
     db.commit()
     db.refresh(new_event)

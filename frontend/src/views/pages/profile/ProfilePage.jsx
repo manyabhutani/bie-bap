@@ -1,8 +1,9 @@
 import React from 'react';
-import { Container, Typography } from '@mui/material';
+import { Container, Box, Typography } from '@mui/material';
 import AuthModel from '../../../models/authModel';
 import VolunteerProfilePage from './VolunteerProfilePage';
 import OrganizerProfilePage from './OrganizerProfilePage';
+import NavBar from '../../../components/NavBar';
 
 const ProfilePage = () => {
     const role = AuthModel.getRole();
@@ -18,9 +19,12 @@ const ProfilePage = () => {
     }
 
     return (
-        <Container>
-            {role === 'organiser' ? <OrganizerProfilePage /> : <VolunteerProfilePage />}
-        </Container>
+        <>
+            <NavBar />
+            <Container sx={{ mt: 4 }}>
+                {role === 'organizer' ? <OrganizerProfilePage /> : <VolunteerProfilePage />}
+            </Container>
+        </>
     );
 };
 

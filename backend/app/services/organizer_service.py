@@ -5,7 +5,7 @@ from app.schemas.organizers import OrganizerCreate, OrganizerUpdate
 
 def get_organizer_by_user_id(db: Session, user_id: int) -> Optional[Organizer]:
     """
-    Retrieve the organiser profile linked to a given user.
+    Retrieve the organizer profile linked to a given user.
     """
     return db.query(Organizer).filter(Organizer.user_id == user_id).first()
 

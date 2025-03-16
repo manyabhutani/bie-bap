@@ -3,7 +3,7 @@ from typing import Optional
 from enum import Enum
 
 class UserRole(str, Enum):
-    organiser = "organiser"
+    organizer = "organizer"
     volunteer = "volunteer"
 
 class UserSignup(BaseModel):

@@ -12,7 +12,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     whatsapp_number = Column(String, unique=True, nullable=False)
-    role = Column(String, default="volunteer")  # volunteer or organiser
+    role = Column(String, default="volunteer")  # volunteer or organizer
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

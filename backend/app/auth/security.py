@@ -47,10 +47,10 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     if user is None:
         raise credentials_exception
     return user
-def organiser_required(current_user: User = Depends(get_current_user)):
-    if current_user.role != "organiser":
+def organizer_required(current_user: User = Depends(get_current_user)):
+    if current_user.role != "organizer":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied, organiser role required"
+            detail="Access denied, organizer role required"
         )
     return current_user
