@@ -12,10 +12,11 @@ from app.services.organizer_service import get_organizer_by_user_id
 
 router = APIRouter()
 
-@router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED , dependencies=[Depends(organizer_required)])
-def create_event_endpoint(event_data: EventCreate, db: Session = Depends(get_db) , current_user=Depends(get_current_user)
-                          ):
+@router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
+def create_event_endpoint(event_data: EventCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     organizer = get_organizer_by_user_id(db, current_user.id)
+    if organizer is None:
+        raise HTTPException(status_code=403, detail="User is not an organizer")
     new_event = create_event(db, event_data, organizer.id)
     return new_event
 
@@ -42,6 +43,8 @@ def update_event_endpoint(event_id: int, event_data: EventUpdate, db: Session = 
 def delete_event_endpoint(event_id: int, db: Session = Depends(get_db)):
     if not delete_event(db, event_id):
         raise HTTPException(status_code=404, detail="Event not found")
+    return {"message": "Event deleted successfully"}
+
 @router.put("/{event_id}/volunteers/{volunteer_id}/status" , dependencies=[Depends(organizer_required)])
 def update_volunteer_registration_status(
         event_id: int,

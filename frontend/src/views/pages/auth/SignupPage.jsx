@@ -46,7 +46,6 @@ const SignupPage = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                // Set the background image
                 backgroundImage: `url(${BG_IMAGE_URL})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',

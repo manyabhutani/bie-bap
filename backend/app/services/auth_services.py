@@ -15,10 +15,10 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-ALLOWED_ROLES = {"volunteer", "organiser"}
+ALLOWED_ROLES = {"volunteer", "organizer"}
 def create_user(db: Session, user_data: UserSignup) -> User:
     if user_data.role not in ALLOWED_ROLES:
-        raise ValueError("Invalid role provided. Must be 'volunteer' or 'organiser'.")
+        raise ValueError("Invalid role provided. Must be 'volunteer' or 'organizer'.")
 
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
@@ -47,14 +47,13 @@ def create_user(db: Session, user_data: UserSignup) -> User:
             user_id=new_user.id,
             first_name=first_name,
             last_name=last_name,
-            phone=user_data.whatsapp_number,  # Using WhatsApp number as phone by default
-            # whatsapp_opt_in=True  # Default to opted in since they provided WhatsApp
+            phone=user_data.whatsapp_number,
         )
         db.add(new_volunteer)
         db.commit()
         db.refresh(new_volunteer)
 
-    elif user_data.role == 'organiser':
+    elif user_data.role == 'organizer':
         new_organizer = Organizer(
             user_id=new_user.id,
             organization_name=user_data.name,

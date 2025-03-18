@@ -79,7 +79,6 @@ const VolunteerProfilePage = () => {
                 }}
             >
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    {/* Page Title */}
                     <Typography variant="h4" sx={{ mb: 4 }}>
                         Volunteer Profile
                     </Typography>

@@ -37,6 +37,7 @@ import {
 } from '@mui/icons-material';
 import API from '../../../services/api';
 import { Link } from 'react-router-dom';
+const BG_IMAGE_URL = `${process.env.PUBLIC_URL}/bg2.jpg`;
 
 const OrganizerProfilePage = () => {
     const [profile, setProfile] = useState({});
@@ -84,16 +85,41 @@ const OrganizerProfilePage = () => {
         setTabValue(newValue);
     };
 
-    const menuItems = [
-        { text: 'My Profile', icon: <PersonIcon />, path: '/organizer/profile' },
-        { text: 'Manage Events', icon: <EventIcon />, path: '/organizer/events' },
-        { text: 'Manage Volunteers', icon: <PeopleIcon />, path: '/organizer/volunteers' },
-    ];
-
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box
+            sx={{
+                minHeight: '100vh',
+                background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+                     url(${BG_IMAGE_URL})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                py: 8,
+            }}
+        >
+            <Container
+                maxWidth="sm"
+                sx={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    borderRadius: 2,
+                    p: 4,
+                }}
+            >
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography variant="h4" sx={{ mb: 4 }}>
+                        Organizer Profile
+                    </Typography>
 
+                    {/* Error Alert */}
+                    {error && (
+                        <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+                </Box>
+            </Container>
         </Box>
+
     );
 };
 

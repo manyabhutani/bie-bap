@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Typography, List, ListItem, ListItemText, Button, Alert } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Container, Typography, List, ListItem, Button, Alert, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import API from '../../../services/api';
 
 const EventListPage = () => {
     const [events, setEvents] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
 
     const fetchEvents = async () => {
         setLoading(true);
@@ -25,10 +24,9 @@ const EventListPage = () => {
         fetchEvents();
     }, []);
 
-    // Handle volunteer signup for an event
     const handleSignup = async (eventId) => {
         try {
-            const res = await API.post(`/events/${eventId}/signup`);
+            await API.post(`/events/${eventId}/signup`);
             alert('Successfully signed up for the event!');
             fetchEvents();
         } catch (err) {
@@ -41,24 +39,24 @@ const EventListPage = () => {
             <Typography variant="h4" gutterBottom>
                 Available Events
             </Typography>
-            {error && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
-                </Alert>
-            )}
-            <List>
-                {events.map((event) => (
-                    <ListItem key={event.id} divider>
-                        <ListItemText
-                            primary={event.title}
-                            secondary={event.description}
-                        />
-                        <Button variant="outlined" onClick={() => handleSignup(event.id)}>
+            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+            {events.map((event) => (
+                <Accordion key={event.id} sx={{ mb: 2 }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography variant="h6">{event.title}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Typography variant="body1">{event.description}</Typography>
+                        <Typography variant="body2">Location: {event.location || "N/A"}</Typography>
+                        <Typography variant="body2">Start: {new Date(event.start_time).toLocaleString()}</Typography>
+                        <Typography variant="body2">End: {new Date(event.end_time).toLocaleString()}</Typography>
+                        <Button variant="contained" color="primary" onClick={() => handleSignup(event.id)} sx={{ mt: 1 }}>
                             Sign Up
                         </Button>
-                    </ListItem>
-                ))}
-            </List>
+                    </AccordionDetails>
+                </Accordion>
+            ))}
         </Container>
     );
 };

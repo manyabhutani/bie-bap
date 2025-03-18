@@ -1,10 +1,11 @@
+// App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './views/pages/auth/LoginPage';
 import SignupPage from './views/pages/auth/SignupPage';
 import PrivateRoute from "./components/PrivateRoute";
 import ProfilePage from "./views/pages/profile/ProfilePage";
-import VolunteerEventListPage from "./views/pages/event/VolunteerEventListPage";
+import EventPage from "./views/pages/event/EventPage";
 
 function App() {
     return (
@@ -20,7 +21,14 @@ function App() {
                         </PrivateRoute>
                     }
                 />
-                <Route path="/events" element={<PrivateRoute><VolunteerEventListPage /></PrivateRoute>} />
+                <Route
+                    path="/events"
+                    element={
+                        <PrivateRoute>
+                            <EventPage />
+                        </PrivateRoute>
+                    }
+                />
             </Routes>
         </Router>
     );

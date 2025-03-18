@@ -13,7 +13,6 @@ class EventBase(BaseModel):
     max_volunteers: int = 0
 
 class EventCreate(EventBase):
-    organizer_id: int
     required_skill_ids: Optional[List[int]] = []
 
 class EventUpdate(BaseModel):
