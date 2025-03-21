@@ -8,9 +8,10 @@ class VolunteerBase(BaseModel):
     last_name: str
     phone: str
     bio: Optional[str] = None
-    availability: Optional[str] = None
     location: Optional[str] = None
     whatsapp_opt_in: bool = False
+    nationality: Optional[str] = None
+    languages: Optional[List[str]] = []
 
 class VolunteerCreate(VolunteerBase):
     user_id: int
@@ -19,6 +20,8 @@ class VolunteerUpdate(VolunteerBase):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     phone: Optional[str] = None
+    nationality: Optional[str] = None
+    languages: Optional[List[str]] = []
 
 class VolunteerRead(VolunteerBase):
     id: int
@@ -29,4 +32,3 @@ class VolunteerRead(VolunteerBase):
 
     class Config:
         orm_mode = True
-

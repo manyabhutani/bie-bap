@@ -4,6 +4,12 @@ from app.schemas.organizers import OrganizerRead, OrganizerUpdate, OrganizerCrea
 from app.services.organizer_service import get_organizer_by_user_id, update_organizer, create_organizer
 from app.db.session import get_db
 from app.auth.security import get_current_user, organizer_required
+from typing import List
+from app.db.models.event import Event
+
+from app.schemas.volunteers import VolunteerRead
+
+from app.db.models.associations import volunteer_events
 
 router = APIRouter()
 
@@ -48,3 +54,12 @@ def create_organizer_profile(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Organizer profile already exists")
     new_organizer = create_organizer(db, organizer_data)
     return new_organizer
+
+@router.get("/{event_id}/volunteers", response_model=List[VolunteerRead])
+def get_event_volunteers(event_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    event = db.query(Event).filter(Event.id == event_id, Event.organizer_id == current_user.id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found or you are not the organizer")
+
+    return event.volunteers
+

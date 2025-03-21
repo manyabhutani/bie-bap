@@ -5,6 +5,10 @@ from app.db.models.event import Event
 from app.db.models.skill import Skill
 from app.schemas.events import EventCreate , EventUpdate
 
+from app.db.models.associations import volunteer_events
+from  app.db.models.volunteer import Volunteer
+
+
 def create_event(db: Session, event_data: EventCreate, organizer_id: int) -> Event:
     new_event = Event(
         title=event_data.title,
@@ -55,13 +59,29 @@ def delete_event(db: Session, event_id: int) -> bool:
     return True
 
 
-def update_volunteer_status(db: Session, event_id: int, volunteer_id: int, new_status: str) -> bool:
+def get_event_volunteers(db: Session, event_id: int):
+    results = (
+        db.query(Volunteer.id, Volunteer.first_name, Volunteer.last_name, volunteer_events.c.status)
+        .join(volunteer_events, Volunteer.id == volunteer_events.c.volunteer_id)
+        .filter(volunteer_events.c.event_id == event_id)
+        .all()
+    )
 
-    result = db.execute(
+    return [{"id": v.id, "name": f"{v.first_name} {v.last_name}", "status": v.status} for v in results]
+
+
+def update_volunteer_status(db: Session, event_id: int, volunteer_id: int, status: str):
+    valid_statuses = ["accepted", "rejected"]
+    if status not in valid_statuses:
+        return {"error": "Invalid status"}
+
+    db.execute(
         volunteer_events.update()
-        .where(volunteer_events.c.event_id == event_id)
-        .where(volunteer_events.c.volunteer_id == volunteer_id)
-        .values(status=new_status)
+        .where(
+            (volunteer_events.c.event_id == event_id) &
+            (volunteer_events.c.volunteer_id == volunteer_id)
+        )
+        .values(status=status)
     )
     db.commit()
-    return result.rowcount > 0
+    return {"message": f"Volunteer {status} successfully"}

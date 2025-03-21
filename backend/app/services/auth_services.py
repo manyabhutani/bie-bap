@@ -48,7 +48,10 @@ def create_user(db: Session, user_data: UserSignup) -> User:
             first_name=first_name,
             last_name=last_name,
             phone=user_data.whatsapp_number,
+            nationality=user_data.nationality,
+            language=user_data.language
         )
+
         db.add(new_volunteer)
         db.commit()
         db.refresh(new_volunteer)

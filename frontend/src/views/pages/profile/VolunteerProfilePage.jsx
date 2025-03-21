@@ -6,14 +6,22 @@ import {
     TextField,
     Button,
     Alert,
-    Collapse,
-    Divider
+    Divider,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
+    Checkbox,
+    ListItemText,
+    ListItem,
+    List,
+    CircularProgress,
+    Paper,
+    Avatar,
 } from '@mui/material';
 import API from '../../../services/api';
 
 const BG_IMAGE_URL = `${process.env.PUBLIC_URL}/bg2.jpg`;
-
-const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeNn2IZwZ7LqCDFoRRWGi4QK9PKEbuRgmn4ilDw3PpSZXlWcA/viewform?embedded=true";
 
 const VolunteerProfilePage = () => {
     const [profile, setProfile] = useState({});
@@ -58,6 +66,20 @@ const VolunteerProfilePage = () => {
         setShowForm((prev) => !prev);
     };
 
+    const nationalityOptions = ['USA', 'Canada', 'India', 'Germany', 'Brazil'];
+
+    const languageOptions = ['English', 'Spanish', 'French', 'German', 'Hindi'];
+
+    const handleLanguageChange = (event) => {
+        const {
+            target: { value },
+        } = event;
+        setProfile({
+            ...profile,
+            language: typeof value === 'string' ? value.split(',') : value,
+        });
+    };
+
     return (
         <Box
             sx={{
@@ -73,24 +95,34 @@ const VolunteerProfilePage = () => {
             <Container
                 maxWidth="sm"
                 sx={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                    borderRadius: 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderRadius: 4,
                     p: 4,
+                    boxShadow: 3,
                 }}
             >
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Typography variant="h4" sx={{ mb: 4 }}>
+                    <Avatar
+                        sx={{
+                            width: 100,
+                            height: 100,
+                            mb: 2,
+                            bgcolor: 'primary.main',
+                            fontSize: '2.5rem',
+                        }}
+                    >
+                        {profile.first_name?.charAt(0) || 'V'}
+                    </Avatar>
+                    <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'primary.main' }}>
                         Volunteer Profile
                     </Typography>
 
-                    {/* Error Alert */}
                     {error && (
                         <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
                             {error}
                         </Alert>
                     )}
 
-                    {/* Profile Form */}
                     <Box
                         component="form"
                         onSubmit={handleUpdate}
@@ -105,6 +137,8 @@ const VolunteerProfilePage = () => {
                             value={profile.first_name || ''}
                             onChange={handleChange}
                             disabled={loading}
+                            variant="outlined"
+                            sx={{ mb: 2 }}
                         />
                         <TextField
                             label="Last Name"
@@ -114,6 +148,8 @@ const VolunteerProfilePage = () => {
                             value={profile.last_name || ''}
                             onChange={handleChange}
                             disabled={loading}
+                            variant="outlined"
+                            sx={{ mb: 2 }}
                         />
                         <TextField
                             label="Phone"
@@ -123,6 +159,8 @@ const VolunteerProfilePage = () => {
                             value={profile.phone || ''}
                             onChange={handleChange}
                             disabled={loading}
+                            variant="outlined"
+                            sx={{ mb: 2 }}
                         />
                         <TextField
                             label="Bio"
@@ -134,41 +172,57 @@ const VolunteerProfilePage = () => {
                             value={profile.bio || ''}
                             onChange={handleChange}
                             disabled={loading}
+                            variant="outlined"
+                            sx={{ mb: 2 }}
                         />
+                        <FormControl fullWidth margin="normal" disabled={loading} sx={{ mb: 2 }}>
+                            <InputLabel>Nationality</InputLabel>
+                            <Select
+                                label="Nationality"
+                                name="nationality"
+                                value={profile.nationality || ''}
+                                onChange={handleChange}
+                                variant="outlined"
+                            >
+                                {nationalityOptions.map((nationality) => (
+                                    <MenuItem key={nationality} value={nationality}>
+                                        {nationality}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl fullWidth margin="normal" disabled={loading} sx={{ mb: 2 }}>
+                            <InputLabel>Languages</InputLabel>
+                            <Select
+                                label="Languages"
+                                name="language"
+                                multiple
+                                value={profile.language || []}
+                                onChange={handleLanguageChange}
+                                renderValue={(selected) => selected.join(', ')}
+                                variant="outlined"
+                            >
+                                {languageOptions.map((language) => (
+                                    <MenuItem key={language} value={language}>
+                                        <Checkbox checked={profile.language?.includes(language)} />
+                                        <ListItemText primary={language} />
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
                         <Button
                             type="submit"
                             variant="contained"
                             color="primary"
-                            sx={{ mt: 3 }}
+                            sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem' }}
                             disabled={loading}
                             fullWidth
                         >
-                            {loading ? 'UPDATING PROFILE...' : 'UPDATE PROFILE'}
+                            {loading ? <CircularProgress size={24} /> : 'UPDATE PROFILE'}
                         </Button>
                     </Box>
-
-                    {/* Divider and Google Form Toggle */}
-                    <Divider sx={{ width: '100%', my: 4 }} />
-                    <Button variant="outlined" onClick={toggleForm} sx={{ mb: 2 }}>
-                        {showForm ? 'Hide Additional Form' : 'Fill Additional Info'}
-                    </Button>
-
-                    <Collapse in={showForm} sx={{ width: '100%', maxWidth: 600 }}>
-                        <Box sx={{ border: '1px solid #ccc', borderRadius: 2, overflow: 'hidden' }}>
-                            <Typography variant="h6" sx={{ p: 2, bgcolor: 'grey.100' }}>
-                                Additional Volunteer Info
-                            </Typography>
-                            <iframe
-                                title="Google Form for Additional Info"
-                                src={GOOGLE_FORM_URL}
-                                width="100%"
-                                height="800"
-                                style={{ border: 'none' }}
-                            >
-                                Loading...
-                            </iframe>
-                        </Box>
-                    </Collapse>
                 </Box>
             </Container>
         </Box>

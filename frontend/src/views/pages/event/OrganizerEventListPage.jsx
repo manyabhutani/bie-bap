@@ -10,6 +10,9 @@ const EventListPage = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [newEvent, setNewEvent] = useState({ title: '', description: '', location: '', start_time: '', end_time: '' , max_volunteers: '' });
     const navigate = useNavigate();
+    const [editingEvent, setEditingEvent] = useState(null);
+    const [openEditDialog, setOpenEditDialog] = useState(false);
+
 
     const fetchEvents = async () => {
         setLoading(true);
@@ -54,15 +57,24 @@ const EventListPage = () => {
             }
         }
     };
-
     const handleUpdateEvent = async () => {
-        try{
-            const res  = await API.put('/events/${event.id}}/');
-            alert('Event Updated Successfully!');
-            fetchEvents();
-        }catch (err){
-            console.error("Event update error:" , err.response?.data)
+        try {
+            if (!editingEvent) return;
 
+            const updatedEventData = {
+                ...editingEvent,
+                start_time: new Date(editingEvent.start_time).toISOString(),
+                end_time: new Date(editingEvent.end_time).toISOString(),
+            };
+
+            await API.put(`/events/${editingEvent.id}/`, updatedEventData);
+
+            alert('Event updated successfully!');
+            setOpenEditDialog(false);
+            fetchEvents();
+        } catch (err) {
+            console.error('Event update error:', err.response?.data);
+            setError('Error updating event. Please check your inputs.');
         }
     };
 
@@ -101,9 +113,15 @@ const EventListPage = () => {
                             primary={event.title}
                             secondary={event.description}
                         />
-                        <Button variant="outlined" color="secondary" onClick={() => navigate('/events')}>
+                        <Button variant="outlined" color="secondary"
+                            onClick={() => {
+                                setEditingEvent(event);
+                                setOpenEditDialog(true);
+                            }}
+                        >
                             Edit
                         </Button>
+
                     </ListItem>
                 ))}
             </List>
@@ -174,6 +192,72 @@ const EventListPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+                <DialogTitle>Edit Event</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        name="title"
+                        label="Title"
+                        fullWidth
+                        value={editingEvent?.title || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                        sx={{ mb: 2 }}
+                    />
+                    <TextField
+                        name="description"
+                        label="Description"
+                        fullWidth
+                        value={editingEvent?.description || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                        sx={{ mb: 2 }}
+                    />
+                    <TextField
+                        name="location"
+                        label="Location"
+                        fullWidth
+                        value={editingEvent?.location || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                        sx={{ mb: 2 }}
+                    />
+                    <TextField
+                        name="start_time"
+                        label="Start Time"
+                        type="datetime-local"
+                        fullWidth
+                        value={editingEvent?.start_time?.slice(0, 16) || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, start_time: e.target.value })}
+                        sx={{ mb: 2 }}
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        name="end_time"
+                        label="End Time"
+                        type="datetime-local"
+                        fullWidth
+                        value={editingEvent?.end_time?.slice(0, 16) || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, end_time: e.target.value })}
+                        sx={{ mb: 2 }}
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        name="max_volunteers"
+                        label="Max Volunteers"
+                        fullWidth
+                        value={editingEvent?.max_volunteers || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, max_volunteers: e.target.value })}
+                        sx={{ mb: 2 }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEditDialog(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={() => handleUpdateEvent()} color="primary">
+                        Save Changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
         </Container>
     );
 };

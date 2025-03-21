@@ -10,6 +10,10 @@ from app.db.models.event import Event
 
 from app.services.organizer_service import get_organizer_by_user_id
 
+from app.services.event_service import update_volunteer_status
+
+from app.services.event_service import get_event_volunteers
+
 router = APIRouter()
 
 @router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
@@ -83,3 +87,12 @@ def signup_for_event(event_id: int, db: Session = Depends(get_db), current_user=
     event.volunteers.append(volunteer)
     db.commit()
     return {"message": "Successfully signed up for the event"}
+
+@router.get("/{event_id}/volunteers")
+def get_signed_up_volunteers(event_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    return get_event_volunteers(db, event_id)
+
+
+@router.put("/{event_id}/volunteers/{volunteer_id}/status")
+def update_volunteer_application_status(event_id: int, volunteer_id: int, status: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    return update_volunteer_status(db, event_id, volunteer_id, status)

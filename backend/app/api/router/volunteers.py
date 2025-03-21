@@ -13,6 +13,10 @@ from app.services.volunteer_service import (
 from app.db.session import get_db
 from app.auth.security import get_current_user
 
+from app.db.models.volunteer import Volunteer
+
+from app.services.volunteer_service import get_volunteer_events
+
 router = APIRouter()
 
 @router.get("/me", response_model=VolunteerBase)
@@ -61,3 +65,11 @@ def signup_for_event(event_id: int, db: Session = Depends(get_db), current_user 
     if "error" in result:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["error"])
     return result
+
+@router.get("/volunteers/me/events")
+def get_my_events(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    volunteer = get_volunteer_by_user_id(db, current_user.id)
+    if not volunteer:
+        raise HTTPException(status_code=404, detail="Volunteer profile not found")
+
+    return get_volunteer_events(db, volunteer.id)

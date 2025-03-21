@@ -5,6 +5,11 @@ from app.db.session import  Base
 
 from app.db.models.associations import volunteer_skills, volunteer_events
 
+
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.types import JSON
+
+
 class Volunteer(Base):
     __tablename__ = "volunteers"
 
@@ -14,11 +19,14 @@ class Volunteer(Base):
     last_name = Column(String)
     phone = Column(String)
     bio = Column(Text, nullable=True)
-    availability = Column(String, nullable=True)
     location = Column(String, nullable=True)
-    whatsapp_opt_in = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    #from the google form
+    nationality = Column(String)
+    languages = Column(MutableList.as_mutable(JSON), nullable=True)  
+
 
     # Relationships
     user = relationship("User", backref="volunteer", uselist=False)

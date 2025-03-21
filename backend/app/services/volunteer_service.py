@@ -5,6 +5,9 @@ from app.db.models.event import Event
 from app.db.models.skill import Skill
 from app.schemas.volunteers import VolunteerCreate, VolunteerUpdate
 
+from app.db.models.associations import volunteer_events
+
+
 def get_volunteer_by_user_id(db: Session, user_id: int) -> Optional[Volunteer]:
     return db.query(Volunteer).filter(Volunteer.user_id == user_id).first()
 
@@ -58,3 +61,13 @@ def register_volunteer_for_event(db: Session, volunteer_id: int, event_id: int) 
     db.commit()
     db.refresh(event)
     return {"message": "Volunteer registered successfully", "event_id": event.id, "volunteer_id": volunteer.id}
+
+def get_volunteer_events(db: Session, volunteer_id: int):
+    results = (
+        db.query(Event.id, Event.title, Event.description, volunteer_events.c.status)
+        .join(volunteer_events, Event.id == volunteer_events.c.event_id)
+        .filter(volunteer_events.c.volunteer_id == volunteer_id)
+        .all()
+    )
+
+    return [{"id": r.id, "title": r.title, "description": r.description, "status": r.status} for r in results]
