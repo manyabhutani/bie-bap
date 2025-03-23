@@ -10,9 +10,10 @@ from app.db.models.event import Event
 
 from app.services.organizer_service import get_organizer_by_user_id
 
-from app.services.event_service import update_volunteer_status
 
-from app.services.event_service import get_event_volunteers
+from app.services.event_service import assign_volunteers_to_event, get_assigned_events_for_volunteer
+
+from app.schemas.events import VolunteerAssignRequest
 
 router = APIRouter()
 
@@ -49,50 +50,18 @@ def delete_event_endpoint(event_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Event not found")
     return {"message": "Event deleted successfully"}
 
-@router.put("/{event_id}/volunteers/{volunteer_id}/status" , dependencies=[Depends(organizer_required)])
-def update_volunteer_registration_status(
+@router.post("/{event_id}/assign", response_model=EventRead)
+def assign_volunteers(
         event_id: int,
-        volunteer_id: int,
-        new_status: str,
+        request: VolunteerAssignRequest,
         db: Session = Depends(get_db),
+        current_user=Depends(get_current_user),
 ):
-    allowed_statuses = {"registered", "accepted", "rejected", "cancelled", "attended"}
-    if new_status not in allowed_statuses:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid status")
-    success = update_volunteer_status(db, event_id, volunteer_id, new_status)
-    if not success:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Volunteer registration not found")
-    return {"message": "Volunteer registration status updated"}
+    event, error = assign_volunteers_to_event(db, event_id, request.volunteer_ids)
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+    return event
 
-
-@router.post("/{event_id}/signup", status_code=status.HTTP_200_OK)
-def signup_for_event(event_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    if current_user.role != "volunteer":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only volunteers can sign up for events")
-
-    volunteer = db.query(Volunteer).filter(Volunteer.user_id == current_user.id).first()
-    if not volunteer:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Volunteer profile not found")
-
-    event = db.query(Event).filter(Event.id == event_id).first()
-    if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-
-    if volunteer in event.volunteers:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Already signed up for this event")
-
-    if event.max_volunteers and len(event.volunteers) >= event.max_volunteers:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Event is full")
-
-    event.volunteers.append(volunteer)
-    db.commit()
-    return {"message": "Successfully signed up for the event"}
-
-@router.get("/{event_id}/volunteers")
-def get_signed_up_volunteers(event_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return get_event_volunteers(db, event_id)
-
-
-@router.put("/{event_id}/volunteers/{volunteer_id}/status")
-def update_volunteer_application_status(event_id: int, volunteer_id: int, status: str, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return update_volunteer_status(db, event_id, volunteer_id, status)
+@router.get("/volunteers/me/events", response_model=List[EventRead])
+def get_my_events(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    return get_assigned_events_for_volunteer(db, current_user.id)

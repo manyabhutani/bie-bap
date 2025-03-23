@@ -6,18 +6,15 @@ import {
     TextField,
     Button,
     Alert,
-    Divider,
     MenuItem,
     Select,
     FormControl,
     InputLabel,
     Checkbox,
     ListItemText,
-    ListItem,
-    List,
     CircularProgress,
-    Paper,
     Avatar,
+    Grid,
 } from '@mui/material';
 import API from '../../../services/api';
 
@@ -27,7 +24,6 @@ const VolunteerProfilePage = () => {
     const [profile, setProfile] = useState({});
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [showForm, setShowForm] = useState(false);
 
     const fetchProfile = async () => {
         setLoading(true);
@@ -62,12 +58,7 @@ const VolunteerProfilePage = () => {
         }
     };
 
-    const toggleForm = () => {
-        setShowForm((prev) => !prev);
-    };
-
     const nationalityOptions = ['USA', 'Canada', 'India', 'Germany', 'Brazil'];
-
     const languageOptions = ['English', 'Spanish', 'French', 'German', 'Hindi'];
 
     const handleLanguageChange = (event) => {
@@ -84,146 +75,189 @@ const VolunteerProfilePage = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                background: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
-                     url(${BG_IMAGE_URL})`,
+                background: `url(${BG_IMAGE_URL})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                py: 8,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
             }}
         >
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(19,2,2,0.4)',
+                    zIndex: 1,
+                }}
+            />
+
             <Container
-                maxWidth="sm"
+                maxWidth="md"
                 sx={{
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                     borderRadius: 4,
                     p: 4,
                     boxShadow: 3,
+                    zIndex: 2,
+                    position: 'relative',
                 }}
             >
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Avatar
-                        sx={{
-                            width: 100,
-                            height: 100,
-                            mb: 2,
-                            bgcolor: 'primary.main',
-                            fontSize: '2.5rem',
-                        }}
-                    >
-                        {profile.first_name?.charAt(0) || 'V'}
-                    </Avatar>
-                    <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'primary.main' }}>
-                        Volunteer Profile
-                    </Typography>
-
-                    {error && (
-                        <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
-
-                    <Box
-                        component="form"
-                        onSubmit={handleUpdate}
-                        noValidate
-                        sx={{ width: '100%', maxWidth: 500 }}
-                    >
-                        <TextField
-                            label="First Name"
-                            name="first_name"
-                            fullWidth
-                            margin="normal"
-                            value={profile.first_name || ''}
-                            onChange={handleChange}
-                            disabled={loading}
-                            variant="outlined"
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Last Name"
-                            name="last_name"
-                            fullWidth
-                            margin="normal"
-                            value={profile.last_name || ''}
-                            onChange={handleChange}
-                            disabled={loading}
-                            variant="outlined"
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Phone"
-                            name="phone"
-                            fullWidth
-                            margin="normal"
-                            value={profile.phone || ''}
-                            onChange={handleChange}
-                            disabled={loading}
-                            variant="outlined"
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Bio"
-                            name="bio"
-                            fullWidth
-                            multiline
-                            rows={3}
-                            margin="normal"
-                            value={profile.bio || ''}
-                            onChange={handleChange}
-                            disabled={loading}
-                            variant="outlined"
-                            sx={{ mb: 2 }}
-                        />
-                        <FormControl fullWidth margin="normal" disabled={loading} sx={{ mb: 2 }}>
-                            <InputLabel>Nationality</InputLabel>
-                            <Select
-                                label="Nationality"
-                                name="nationality"
-                                value={profile.nationality || ''}
-                                onChange={handleChange}
-                                variant="outlined"
-                            >
-                                {nationalityOptions.map((nationality) => (
-                                    <MenuItem key={nationality} value={nationality}>
-                                        {nationality}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
-                        <FormControl fullWidth margin="normal" disabled={loading} sx={{ mb: 2 }}>
-                            <InputLabel>Languages</InputLabel>
-                            <Select
-                                label="Languages"
-                                name="language"
-                                multiple
-                                value={profile.language || []}
-                                onChange={handleLanguageChange}
-                                renderValue={(selected) => selected.join(', ')}
-                                variant="outlined"
-                            >
-                                {languageOptions.map((language) => (
-                                    <MenuItem key={language} value={language}>
-                                        <Checkbox checked={profile.language?.includes(language)} />
-                                        <ListItemText primary={language} />
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1rem' }}
-                            disabled={loading}
-                            fullWidth
+                <Grid container spacing={4}>
+                    <Grid item xs={12} md={4}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                            }}
                         >
-                            {loading ? <CircularProgress size={24} /> : 'UPDATE PROFILE'}
-                        </Button>
-                    </Box>
-                </Box>
+                            {/* Avatar */}
+                            <Avatar
+                                sx={{
+                                    width: 100,
+                                    height: 100,
+                                    mb: 2,
+                                    bgcolor: 'primary.main',
+                                    fontSize: '2.5rem',
+                                }}
+                            >
+                                {profile.first_name?.charAt(0) || 'V'}
+                            </Avatar>
+
+                            {/* Title */}
+                            <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: 'primary.main' }}>
+                                Volunteer Profile
+                            </Typography>
+                        </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={8}>
+                        <Box
+                            component="form"
+                            onSubmit={handleUpdate}
+                            noValidate
+                            sx={{ width: '100%' }}
+                        >
+                            {/* Error Alert */}
+                            {error && (
+                                <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                                    {error}
+                                </Alert>
+                            )}
+
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        label="First Name"
+                                        name="first_name"
+                                        fullWidth
+                                        margin="normal"
+                                        value={profile.first_name || ''}
+                                        onChange={handleChange}
+                                        disabled={loading}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        label="Last Name"
+                                        name="last_name"
+                                        fullWidth
+                                        margin="normal"
+                                        value={profile.last_name || ''}
+                                        onChange={handleChange}
+                                        disabled={loading}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        label="Phone"
+                                        name="phone"
+                                        fullWidth
+                                        margin="normal"
+                                        value={profile.phone || ''}
+                                        onChange={handleChange}
+                                        disabled={loading}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        label="Bio"
+                                        name="bio"
+                                        fullWidth
+                                        multiline
+                                        rows={3}
+                                        margin="normal"
+                                        value={profile.bio || ''}
+                                        onChange={handleChange}
+                                        disabled={loading}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <FormControl fullWidth margin="normal" disabled={loading}>
+                                        <InputLabel>Nationality</InputLabel>
+                                        <Select
+                                            label="Nationality"
+                                            name="nationality"
+                                            value={profile.nationality || ''}
+                                            onChange={handleChange}
+                                            variant="outlined"
+                                        >
+                                            {nationalityOptions.map((nationality) => (
+                                                <MenuItem key={nationality} value={nationality}>
+                                                    {nationality}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <FormControl fullWidth margin="normal" disabled={loading}>
+                                        <InputLabel>Languages</InputLabel>
+                                        <Select
+                                            label="Languages"
+                                            name="language"
+                                            multiple
+                                            value={profile.language || []}
+                                            onChange={handleLanguageChange}
+                                            renderValue={(selected) => selected.join(', ')}
+                                            variant="outlined"
+                                        >
+                                            {languageOptions.map((language) => (
+                                                <MenuItem key={language} value={language}>
+                                                    <Checkbox checked={profile.language?.includes(language)} />
+                                                    <ListItemText primary={language} />
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        sx={{ mt: 2, py: 1.5, fontSize: '1rem' }}
+                                        disabled={loading}
+                                        fullWidth
+                                    >
+                                        {loading ? <CircularProgress size={24} /> : 'UPDATE PROFILE'}
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </Grid>
+                </Grid>
             </Container>
         </Box>
     );

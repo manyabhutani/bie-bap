@@ -56,20 +56,16 @@ def remove_skill(skill_id: int, db: Session = Depends(get_db), current_user = De
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not remove skill")
     return volunteer
 
-@router.post("/events/{event_id}/signup")
-def signup_for_event(event_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    volunteer = get_volunteer_by_user_id(db, current_user.id)
-    if not volunteer:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Volunteer profile not found")
-    result = register_volunteer_for_event(db, volunteer.id, event_id)
-    if "error" in result:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["error"])
-    return result
 
-@router.get("/volunteers/me/events")
+@router.get("/me/events")
 def get_my_events(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     volunteer = get_volunteer_by_user_id(db, current_user.id)
     if not volunteer:
         raise HTTPException(status_code=404, detail="Volunteer profile not found")
 
     return get_volunteer_events(db, volunteer.id)
+
+@router.get("/", response_model=List[VolunteerRead])
+def get_all_volunteers(db: Session = Depends(get_db)):
+    volunteers = db.query(Volunteer).all()
+    return volunteers

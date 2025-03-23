@@ -3,6 +3,8 @@ from typing import List, Optional
 from datetime import datetime
 from app.schemas.skills import SkillRead
 
+from app.schemas.volunteers import VolunteerRead
+
 
 class EventBase(BaseModel):
     title: str
@@ -28,8 +30,12 @@ class EventRead(EventBase):
     organizer_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    volunteers: List[VolunteerRead] = []
 
-    class Config:
+class VolunteerAssignRequest(BaseModel):
+    volunteer_ids: List[int]
+
+class Config:
         orm_mode = True
 
 class EventDetail(EventRead):

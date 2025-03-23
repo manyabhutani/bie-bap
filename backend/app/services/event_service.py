@@ -70,18 +70,21 @@ def get_event_volunteers(db: Session, event_id: int):
     return [{"id": v.id, "name": f"{v.first_name} {v.last_name}", "status": v.status} for v in results]
 
 
-def update_volunteer_status(db: Session, event_id: int, volunteer_id: int, status: str):
-    valid_statuses = ["accepted", "rejected"]
-    if status not in valid_statuses:
-        return {"error": "Invalid status"}
 
-    db.execute(
-        volunteer_events.update()
-        .where(
-            (volunteer_events.c.event_id == event_id) &
-            (volunteer_events.c.volunteer_id == volunteer_id)
-        )
-        .values(status=status)
-    )
+def assign_volunteers_to_event(db: Session, event_id: int, volunteer_ids: List[int]):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        return None, "Event not found"
+
+    volunteers = db.query(Volunteer).filter(Volunteer.id.in_(volunteer_ids)).all()
+    if len(volunteers) != len(volunteer_ids):
+        return None, "Some volunteer IDs are invalid"
+
+    event.volunteers = volunteers
     db.commit()
-    return {"message": f"Volunteer {status} successfully"}
+    db.refresh(event)
+    return event, None
+
+
+def get_assigned_events_for_volunteer(db: Session, volunteer_id: int):
+    return db.query(Event).join(volunteer_events).filter(volunteer_events.c.volunteer_id == volunteer_id).all()
