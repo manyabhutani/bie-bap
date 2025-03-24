@@ -2,7 +2,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.db.models.event import Event
-from app.db.models.skill import Skill
 from app.schemas.events import EventCreate , EventUpdate
 
 from app.db.models.associations import volunteer_events
@@ -23,13 +22,6 @@ def create_event(db: Session, event_data: EventCreate, organizer_id: int) -> Eve
     db.add(new_event)
     db.commit()
     db.refresh(new_event)
-
-    if event_data.required_skill_ids:
-        required_skills = db.query(Skill).filter(Skill.id.in_(event_data.required_skill_ids)).all()
-        new_event.required_skills = required_skills
-        db.commit()
-        db.refresh(new_event)
-
     return new_event
 
 def get_all_events(db: Session) -> List[Event]:

@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from app.db.models.volunteer import Volunteer
 from app.db.models.event import Event
-from app.db.models.skill import Skill
 from app.schemas.volunteers import VolunteerCreate, VolunteerUpdate
 
 from app.db.models.associations import volunteer_events
@@ -21,31 +20,8 @@ def update_volunteer(db: Session, volunteer_id: int, update_data: VolunteerUpdat
         db.refresh(volunteer)
     return volunteer
 
-def add_skill_to_volunteer(db: Session, volunteer_id: int, skill_id: int) -> Optional[Volunteer]:
-    volunteer = db.query(Volunteer).filter(Volunteer.id == volunteer_id).first()
-    if not volunteer:
-        return None
-    skill = db.query(Skill).filter(Skill.id == skill_id).first()
-    if not skill:
-        return None
-    if skill not in volunteer.skills:
-        volunteer.skills.append(skill)
-        db.commit()
-        db.refresh(volunteer)
-    return volunteer
 
-def remove_skill_from_volunteer(db: Session, volunteer_id: int, skill_id: int) -> Optional[Volunteer]:
-    volunteer = db.query(Volunteer).filter(Volunteer.id == volunteer_id).first()
-    if not volunteer:
-        return None
-    skill = db.query(Skill).filter(Skill.id == skill_id).first()
-    if not skill:
-        return None
-    if skill in volunteer.skills:
-        volunteer.skills.remove(skill)
-        db.commit()
-        db.refresh(volunteer)
-    return volunteer
+
 
 def register_volunteer_for_event(db: Session, volunteer_id: int, event_id: int) -> dict:
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import  Base
 
-from app.db.models.associations import volunteer_skills, volunteer_events
+from app.db.models.associations import  volunteer_events
 
 
 from sqlalchemy.ext.mutable import MutableList
@@ -30,7 +30,6 @@ class Volunteer(Base):
 
     # Relationships
     user = relationship("User", backref="volunteer", uselist=False)
-    skills = relationship("Skill", secondary=volunteer_skills, back_populates="volunteers")
     events = relationship("Event", secondary=volunteer_events, back_populates="volunteers")
 
     def __repr__(self):

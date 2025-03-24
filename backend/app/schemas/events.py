@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
-from app.schemas.skills import SkillRead
-
 from app.schemas.volunteers import VolunteerRead
 
 
@@ -38,8 +36,3 @@ class VolunteerAssignRequest(BaseModel):
 class Config:
         orm_mode = True
 
-class EventDetail(EventRead):
-    required_skills: List[SkillRead] = []
-
-    class Config:
-        orm_mode = True

@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Float, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import  Base
-from app.db.models.associations import volunteer_events, event_required_skills
+from app.db.models.associations import volunteer_events
 
 class Event(Base):
     __tablename__ = "events"
@@ -21,7 +21,6 @@ class Event(Base):
     # Relationships
     organizer = relationship("Organizer", back_populates="events")
     volunteers = relationship("Volunteer", secondary=volunteer_events, back_populates="events")
-    required_skills = relationship("Skill", secondary=event_required_skills)
 
     def __repr__(self):
         return f"<Event(id={self.id}, title={self.title})>"
