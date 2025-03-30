@@ -7,6 +7,8 @@ from app.schemas.events import EventCreate , EventUpdate
 from app.db.models.associations import volunteer_events
 from  app.db.models.volunteer import Volunteer
 
+from app.services.whatsapp_service import send_whatsapp_message
+
 
 def create_event(db: Session, event_data: EventCreate, organizer_id: int) -> Event:
     new_event = Event(
@@ -75,6 +77,19 @@ def assign_volunteers_to_event(db: Session, event_id: int, volunteer_ids: List[i
     event.volunteers = volunteers
     db.commit()
     db.refresh(event)
+
+    #whatsap notification
+
+    for volunteer in volunteers:
+        message = (
+            f"Hello {volunteer.first_name},\n"
+            f"You have been assigned to the event: {event.title}\n"
+            # f"Date: {event.date} at {event.time}\n"
+            f"Location: {event.location}\n"
+            "Please confirm your availability."
+        )
+        send_whatsapp_message(volunteer.phone, message)
+
     return event, None
 
 

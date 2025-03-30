@@ -67,7 +67,7 @@ const VolunteerProfilePage = () => {
         } = event;
         setProfile({
             ...profile,
-            language: typeof value === 'string' ? value.split(',') : value,
+            languages: typeof value === 'string' ? value.split(',') : value,
         });
     };
 
@@ -228,14 +228,14 @@ const VolunteerProfilePage = () => {
                                             label="Languages"
                                             name="language"
                                             multiple
-                                            value={profile.language || []}
+                                            value={profile.languages || []}
                                             onChange={handleLanguageChange}
                                             renderValue={(selected) => selected.join(', ')}
                                             variant="outlined"
                                         >
                                             {languageOptions.map((language) => (
                                                 <MenuItem key={language} value={language}>
-                                                    <Checkbox checked={profile.language?.includes(language)} />
+                                                    <Checkbox checked={profile.languages?.includes(language)} />
                                                     <ListItemText primary={language} />
                                                 </MenuItem>
                                             ))}

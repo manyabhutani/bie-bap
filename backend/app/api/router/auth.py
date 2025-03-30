@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -10,8 +11,17 @@ from app.config import settings
 
 router = APIRouter()
 
+def is_valid_whatsapp_number(phone: str) -> bool:
+    pattern = r"^\+?[1-9]\d{7,14}$"
+    return re.match(pattern, phone) is not None
+
 @router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def signup(user_data: UserSignup, db: Session = Depends(get_db)):
+    if not is_valid_whatsapp_number(user_data.whatsapp_number):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid WhatsApp number format. Use international format, e.g., +1234567890"
+        )
     try:
         user = create_user(db, user_data)
     except ValueError as e:

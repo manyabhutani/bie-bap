@@ -20,6 +20,13 @@ import {
     Chip,
 } from '@mui/material';
 import API from '../../../services/api';
+import {
+    EventNote as EventIcon,
+    People as VolunteerIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Person as ProfileIcon
+} from '@mui/icons-material';
 
 const EventListPage = () => {
     const [events, setEvents] = useState([]);
@@ -169,10 +176,22 @@ const EventListPage = () => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                             <ListItemText
                                 primary={event.title}
-                                secondary={event.description}
+                                secondary={
+                                    <>
+                                        <Typography variant="body2">
+                                            {event.description}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>Start:</strong> {event.start_time}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            <strong>End:</strong> {event.end_time}
+                                        </Typography>
+                                    </>
+                                }
                             />
                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                <Button variant="outlined" color="secondary"
+                                <Button variant="outlined" color="primary" startIcon={<EditIcon/>}
                                         onClick={() => {
                                             setEditingEvent(event);
                                             setOpenEditDialog(true);
@@ -180,11 +199,11 @@ const EventListPage = () => {
                                     Edit
                                 </Button>
 
-                                <Button variant="outlined" color="error" onClick={() => handleDeleteEvent(event.id)}>
+                                <Button variant="outlined" startIcon={<DeleteIcon/>} color="error" onClick={() => handleDeleteEvent(event.id)}>
                                     Delete
                                 </Button>
 
-                                <Button variant="contained" color="primary" onClick={() => {
+                                <Button variant="contained" startIcon={<VolunteerIcon />} color="primary" onClick={() => {
                                     setSelectedEventId(event.id);
                                     setOpenAssignDialog(true);
                                 }}>
@@ -305,7 +324,7 @@ const EventListPage = () => {
                         variant="outlined"
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        sx={{ mb: 2 }}
+                        sx={{ mb: 1}}
                     />
                     <List>
                         {filteredVolunteers.map((volunteer) => (
@@ -354,7 +373,7 @@ const EventListPage = () => {
                             <Typography variant="body1"><strong>Phone:</strong> {selectedVolunteerProfile.phone}</Typography>
                             <Typography variant="body1"><strong>Email:</strong> {selectedVolunteerProfile.email}</Typography>
                             <Typography variant="body1"><strong>Nationality:</strong> {selectedVolunteerProfile.nationality}</Typography>
-                            <Typography variant="body1"><strong>Languages:</strong> {selectedVolunteerProfile.language?.join(', ')}</Typography>
+                            <Typography variant="body1"><strong>Languages:</strong> {selectedVolunteerProfile.languages?.join(', ')}</Typography>
                         </Box>
                     )}
                 </DialogContent>

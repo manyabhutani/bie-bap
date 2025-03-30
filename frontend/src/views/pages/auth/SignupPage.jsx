@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import {
     Box,
     Container,
@@ -9,6 +9,7 @@ import {
     Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+
 import AuthModel from '../../../models/authModel';
 
 const BG_IMAGE_URL = '/fscz.jpg';
@@ -29,12 +30,22 @@ const SignupPage = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const isValidWhatsAppNumber = (number) => {
+        const regex = /^\+?[1-9]\d{7,14}$/;
+        return regex.test(number);
+    };
+
     const handleSignup = async (e) => {
         e.preventDefault();
+        setError('');
+        if (!isValidWhatsAppNumber(formData.whatsapp_number)) {
+            setError("Invalid WhatsApp number. Use international format, e.g., +1234567890");
+            return;
+        }
         setLoading(true);
         try {
             await AuthModel.signup(formData);
-            navigate('/'); // Redirect to login
+            navigate('/');
         } catch (err) {
             setError(err.message);
         } finally {
