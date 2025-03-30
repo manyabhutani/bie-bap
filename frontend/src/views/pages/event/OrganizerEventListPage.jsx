@@ -18,6 +18,9 @@ import {
     ListItemIcon,
     Avatar,
     Chip,
+    Paper,
+    IconButton,
+    Divider
 } from '@mui/material';
 import API from '../../../services/api';
 import {
@@ -25,8 +28,11 @@ import {
     People as VolunteerIcon,
     Edit as EditIcon,
     Delete as DeleteIcon,
-    Person as ProfileIcon
+    Person as ProfileIcon,
+    Schedule as ScheduleIcon,
+    LocationOn as LocationIcon
 } from '@mui/icons-material';
+import { format, parseISO } from 'date-fns';
 
 const EventListPage = () => {
     const [events, setEvents] = useState([]);
@@ -47,6 +53,26 @@ const EventListPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedVolunteerProfile, setSelectedVolunteerProfile] = useState(null);
 
+    const formatDateTime = (dateTimeString) => {
+        if (!dateTimeString) return '';
+        try {
+            const date = parseISO(dateTimeString);
+            return format(date, 'MMM d, yyyy h:mm a');
+        } catch (e) {
+            return dateTimeString;
+        }
+    };
+
+    const formatDateForInput = (dateTimeString) => {
+        if (!dateTimeString) return '';
+        try {
+            const date = parseISO(dateTimeString);
+            return format(date, "yyyy-MM-dd'T'HH:mm");
+        } catch (e) {
+            return '';
+        }
+    };
+
     const fetchVolunteers = async () => {
         setLoading(true);
         try {
@@ -63,7 +89,7 @@ const EventListPage = () => {
         setLoading(true);
         try {
             const res = await API.get('/events');
-            console.log("Fetched Events:", res.data); // Log the backend response
+            console.log("Fetched Events:", res.data);
             setEvents(res.data);
         } catch (err) {
             setError('Error fetching events');
@@ -88,8 +114,10 @@ const EventListPage = () => {
             await API.post('/events', formattedEventData);
             alert('Event created successfully!');
             setOpenDialog(false);
+            setNewEvent({ title: '', description: '', location: '', start_time: '', end_time: '', max_volunteers: '' });
             fetchEvents();
         } catch (err) {
+            console.error('Create error:', err);
             setError('Error creating event. Please check inputs.');
         }
     };
@@ -100,8 +128,12 @@ const EventListPage = () => {
 
             const updatedEventData = {
                 ...editingEvent,
-                start_time: new Date(editingEvent.start_time).toISOString(),
-                end_time: new Date(editingEvent.end_time).toISOString(),
+                start_time: editingEvent.start_time.includes('T')
+                    ? editingEvent.start_time
+                    : new Date(editingEvent.start_time).toISOString(),
+                end_time: editingEvent.end_time.includes('T')
+                    ? editingEvent.end_time
+                    : new Date(editingEvent.end_time).toISOString(),
             };
 
             await API.put(`/events/${editingEvent.id}/`, updatedEventData);
@@ -110,6 +142,7 @@ const EventListPage = () => {
             setOpenEditDialog(false);
             fetchEvents();
         } catch (err) {
+            console.error('Update error:', err);
             setError('Error updating event.');
         }
     };
@@ -153,67 +186,96 @@ const EventListPage = () => {
         setOpenProfileDialog(true);
     };
 
+    const handleOpenAssignDialog = (event) => {
+        setSelectedEventId(event.id);
+        const assignedIds = event.volunteers?.map(v => v.id) || [];
+        setSelectedVolunteers(assignedIds);
+        setOpenAssignDialog(true);
+    };
+
     const filteredVolunteers = volunteers.filter((volunteer) =>
         `${volunteer.first_name} ${volunteer.last_name}`.toLowerCase().includes(searchQuery)
     );
 
     return (
-        <Container maxWidth="md" sx={{ mt: 4, p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 2 }}>
-            <Typography variant="h4" gutterBottom textAlign="center">
+        <Container maxWidth="md" sx={{ mt: 4, p: 3 }}>
+            <Typography variant="h4" gutterBottom textAlign="center" sx={{ mb: 4 }}>
                 Event Management
             </Typography>
 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             {loading && <CircularProgress sx={{ display: 'block', mx: 'auto', my: 3 }} />}
 
-            <Button variant="contained" color="primary" fullWidth sx={{ mb: 3 }} onClick={() => setOpenDialog(true)}>
+            <Button
+                variant="contained"
+                color="primary"
+                sx={{ mb: 3 }}
+                onClick={() => setOpenDialog(true)}
+                startIcon={<EventIcon />}
+            >
                 Create New Event
             </Button>
 
-            <List>
+            <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {events.map((event) => (
-                    <ListItem key={event.id} divider sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                            <ListItemText
-                                primary={event.title}
-                                secondary={
-                                    <>
-                                        <Typography variant="body2">
-                                            {event.description}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>Start:</strong> {event.start_time}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            <strong>End:</strong> {event.end_time}
-                                        </Typography>
-                                    </>
-                                }
-                            />
+                    <Paper key={event.id} elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Box>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{event.title}</Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                    {event.description}
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
+                                    <ScheduleIcon fontSize="small" color="action" />
+                                    <Typography variant="body2">
+                                        {formatDateTime(event.start_time)} - {formatDateTime(event.end_time)}
+                                    </Typography>
+                                </Box>
+
+                                {event.location && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5, gap: 1 }}>
+                                        <LocationIcon fontSize="small" color="action" />
+                                        <Typography variant="body2">{event.location}</Typography>
+                                    </Box>
+                                )}
+                            </Box>
+
                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                <Button variant="outlined" color="primary" startIcon={<EditIcon/>}
-                                        onClick={() => {
-                                            setEditingEvent(event);
-                                            setOpenEditDialog(true);
-                                        }}>
-                                    Edit
-                                </Button>
+                                <IconButton
+                                    color="primary"
+                                    onClick={() => {
+                                        const eventWithFormattedDates = {
+                                            ...event,
+                                            start_time: formatDateForInput(event.start_time),
+                                            end_time: formatDateForInput(event.end_time)
+                                        };
+                                        setEditingEvent(eventWithFormattedDates);
+                                        setOpenEditDialog(true);
+                                    }}
+                                >
+                                    <EditIcon />
+                                </IconButton>
 
-                                <Button variant="outlined" startIcon={<DeleteIcon/>} color="error" onClick={() => handleDeleteEvent(event.id)}>
-                                    Delete
-                                </Button>
+                                <IconButton
+                                    color="error"
+                                    onClick={() => handleDeleteEvent(event.id)}
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
 
-                                <Button variant="contained" startIcon={<VolunteerIcon />} color="primary" onClick={() => {
-                                    setSelectedEventId(event.id);
-                                    setOpenAssignDialog(true);
-                                }}>
-                                    Assign Volunteers
-                                </Button>
+                                <IconButton
+                                    color="secondary"
+                                    onClick={() => handleOpenAssignDialog(event)}
+                                >
+                                    <VolunteerIcon />
+                                </IconButton>
                             </Box>
                         </Box>
 
                         {event.volunteers?.length > 0 && (
-                            <Box sx={{ mt: 1 }}>
+                            <Box sx={{ mt: 2 }}>
+                                <Divider sx={{ mb: 1 }} />
                                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                                     Assigned Volunteers:
                                 </Typography>
@@ -224,16 +286,17 @@ const EventListPage = () => {
                                             label={`${volunteer.first_name} ${volunteer.last_name}`}
                                             onClick={() => handleViewProfile(volunteer)}
                                             sx={{ cursor: 'pointer' }}
+                                            size="small"
                                         />
                                     ))}
                                 </Box>
                             </Box>
                         )}
-                    </ListItem>
+                    </Paper>
                 ))}
             </List>
 
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
                 <DialogTitle>Create a New Event</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -243,6 +306,7 @@ const EventListPage = () => {
                         value={newEvent.title}
                         onChange={handleInputChange}
                         sx={{ mb: 2 }}
+                        margin="dense"
                     />
                     <TextField
                         name="description"
@@ -251,6 +315,7 @@ const EventListPage = () => {
                         value={newEvent.description}
                         onChange={handleInputChange}
                         sx={{ mb: 2 }}
+                        margin="dense"
                     />
                     <TextField
                         name="location"
@@ -259,6 +324,7 @@ const EventListPage = () => {
                         value={newEvent.location}
                         onChange={handleInputChange}
                         sx={{ mb: 2 }}
+                        margin="dense"
                     />
                     <TextField
                         name="start_time"
@@ -269,6 +335,7 @@ const EventListPage = () => {
                         onChange={handleInputChange}
                         sx={{ mb: 2 }}
                         InputLabelProps={{ shrink: true }}
+                        margin="dense"
                     />
                     <TextField
                         name="end_time"
@@ -279,6 +346,7 @@ const EventListPage = () => {
                         onChange={handleInputChange}
                         sx={{ mb: 2 }}
                         InputLabelProps={{ shrink: true }}
+                        margin="dense"
                     />
                     <TextField
                         name="max_volunteers"
@@ -287,33 +355,87 @@ const EventListPage = () => {
                         value={newEvent.max_volunteers}
                         onChange={handleInputChange}
                         sx={{ mb: 2 }}
+                        margin="dense"
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-                    <Button onClick={handleCreateEvent}>Create Event</Button>
+                    <Button onClick={handleCreateEvent} variant="contained">Create Event</Button>
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} fullWidth maxWidth="sm">
                 <DialogTitle>Edit Event</DialogTitle>
                 <DialogContent>
-                    <TextField name="title" label="Title" fullWidth value={editingEvent?.title || ''} onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })} sx={{ mb: 2 }} />
-                    <TextField name="description" label="Description" fullWidth value={editingEvent?.description || ''} onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })} sx={{ mb: 2 }} />
-                    <TextField name="location" label="Location" fullWidth value={editingEvent?.location || ''} onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })} sx={{ mb: 2 }} />
-                    <TextField name="start_time" label="Start Time" fullWidth value={editingEvent?.start_time || ''} type="datetime-local" onChange={(e) => setEditingEvent({ ...editingEvent, start_time: e.target.value })} sx={{ mb: 2 }} InputLabelProps={{ shrink: true }} />
-                    <TextField name="end_time" label="End Time" fullWidth value={editingEvent?.end_time || ''} type="datetime-local" onChange={(e) => setEditingEvent({ ...editingEvent, end_time: e.target.value })} sx={{ mb: 2 }} InputLabelProps={{ shrink: true }} />
+                    <TextField
+                        name="title"
+                        label="Title"
+                        fullWidth
+                        value={editingEvent?.title || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                        sx={{ mb: 2 }}
+                        margin="dense"
+                    />
+                    <TextField
+                        name="description"
+                        label="Description"
+                        fullWidth
+                        value={editingEvent?.description || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                        sx={{ mb: 2 }}
+                        margin="dense"
+                    />
+                    <TextField
+                        name="location"
+                        label="Location"
+                        fullWidth
+                        value={editingEvent?.location || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                        sx={{ mb: 2 }}
+                        margin="dense"
+                    />
+                    <TextField
+                        name="start_time"
+                        label="Start Time"
+                        fullWidth
+                        value={editingEvent?.start_time || ''}
+                        type="datetime-local"
+                        onChange={(e) => setEditingEvent({ ...editingEvent, start_time: e.target.value })}
+                        sx={{ mb: 2 }}
+                        InputLabelProps={{ shrink: true }}
+                        margin="dense"
+                    />
+                    <TextField
+                        name="end_time"
+                        label="End Time"
+                        fullWidth
+                        value={editingEvent?.end_time || ''}
+                        type="datetime-local"
+                        onChange={(e) => setEditingEvent({ ...editingEvent, end_time: e.target.value })}
+                        sx={{ mb: 2 }}
+                        InputLabelProps={{ shrink: true }}
+                        margin="dense"
+                    />
+                    <TextField
+                        name="max_volunteers"
+                        label="Max Volunteers"
+                        fullWidth
+                        value={editingEvent?.max_volunteers || ''}
+                        onChange={(e) => setEditingEvent({ ...editingEvent, max_volunteers: e.target.value })}
+                        sx={{ mb: 2 }}
+                        margin="dense"
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
-                    <Button onClick={handleUpdateEvent}>Save Changes</Button>
+                    <Button onClick={handleUpdateEvent} variant="contained">Save Changes</Button>
                 </DialogActions>
             </Dialog>
 
             <Dialog
                 open={openAssignDialog}
                 onClose={() => setOpenAssignDialog(false)}
-                maxWidth="md"
+                maxWidth="sm"
                 fullWidth
             >
                 <DialogTitle>Assign Volunteers</DialogTitle>
@@ -324,9 +446,10 @@ const EventListPage = () => {
                         variant="outlined"
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        sx={{ mb: 1}}
+                        sx={{ mb: 2 }}
+                        margin="dense"
                     />
-                    <List>
+                    <List sx={{ maxHeight: 400, overflow: 'auto' }}>
                         {filteredVolunteers.map((volunteer) => (
                             <ListItem key={volunteer.id} divider>
                                 <ListItemIcon>
@@ -340,9 +463,16 @@ const EventListPage = () => {
                                         }}
                                     />
                                 </ListItemIcon>
-                                <ListItemText primary={`${volunteer.first_name} ${volunteer.last_name}`} />
-                                <Button variant="outlined" onClick={() => handleViewProfile(volunteer)}>
-                                    View Profile
+                                <ListItemText
+                                    primary={`${volunteer.first_name} ${volunteer.last_name}`}
+                                    secondary={volunteer.email}
+                                />
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => handleViewProfile(volunteer)}
+                                >
+                                    Profile
                                 </Button>
                             </ListItem>
                         ))}
@@ -350,7 +480,7 @@ const EventListPage = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenAssignDialog(false)}>Cancel</Button>
-                    <Button onClick={handleAssignVolunteers}>Assign</Button>
+                    <Button onClick={handleAssignVolunteers} variant="contained">Assign</Button>
                 </DialogActions>
             </Dialog>
 
@@ -371,9 +501,9 @@ const EventListPage = () => {
                             </Avatar>
                             <Typography variant="h6">{`${selectedVolunteerProfile.first_name} ${selectedVolunteerProfile.last_name}`}</Typography>
                             <Typography variant="body1"><strong>Phone:</strong> {selectedVolunteerProfile.phone}</Typography>
-                            <Typography variant="body1"><strong>Email:</strong> {selectedVolunteerProfile.email}</Typography>
                             <Typography variant="body1"><strong>Nationality:</strong> {selectedVolunteerProfile.nationality}</Typography>
                             <Typography variant="body1"><strong>Languages:</strong> {selectedVolunteerProfile.languages?.join(', ')}</Typography>
+                            <Typography variant="body1"><strong>About:</strong> {selectedVolunteerProfile.bio}</Typography>
                         </Box>
                     )}
                 </DialogContent>

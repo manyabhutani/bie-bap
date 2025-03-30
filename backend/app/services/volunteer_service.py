@@ -40,10 +40,22 @@ def register_volunteer_for_event(db: Session, volunteer_id: int, event_id: int) 
 
 def get_volunteer_events(db: Session, volunteer_id: int):
     results = (
-        db.query(Event.id, Event.title, Event.description, volunteer_events.c.status)
+        db.query(Event.id, Event.title, Event.description, Event.start_time, Event.location, volunteer_events.c.status , Event.end_time)
         .join(volunteer_events, Event.id == volunteer_events.c.event_id)
         .filter(volunteer_events.c.volunteer_id == volunteer_id)
         .all()
     )
+    print(results)
 
-    return [{"id": r.id, "title": r.title, "description": r.description, "status": r.status} for r in results]
+    return [
+        {
+            "id": r.id,
+            "title": r.title,
+            "description": r.description,
+            "start_time": r.start_time,
+            "end_time": r.end_time,
+            "location": r.location
+
+        }
+        for r in results
+    ]
