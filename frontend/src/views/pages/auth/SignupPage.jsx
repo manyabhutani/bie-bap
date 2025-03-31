@@ -35,11 +35,21 @@ const SignupPage = () => {
         return regex.test(number);
     };
 
+    const isValidEmail=(email) => {
+        const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return regex.test(email)
+
+    }
+
     const handleSignup = async (e) => {
         e.preventDefault();
         setError('');
         if (!isValidWhatsAppNumber(formData.whatsapp_number)) {
             setError("Invalid WhatsApp number. Use international format, e.g., +1234567890");
+            return;
+        }
+        if(!isValidEmail(formData.email)){
+            setError("Invalid email address format. Use  format, e.g., abc@xyzs.com");
             return;
         }
         setLoading(true);

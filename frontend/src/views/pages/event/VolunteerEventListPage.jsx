@@ -36,10 +36,10 @@ const VolunteerEventListPage = () => {
     const fetchAssignedEvents = async () => {
         try {
             const res = await API.get('/volunteers/me/events');
-            console.log("API Response:", res.data); // Debug log
+            console.log("API Response:", res.data);
 
             const transformedEvents = res.data.map(event => {
-                console.log("Processing event:", event.start_time); // Debug each event
+                console.log("Processing event:", event.start_time);
                 return {
                     ...event,
                     start: new Date(event.start_time),
@@ -204,7 +204,6 @@ const VolunteerEventListPage = () => {
                                     </Typography>
                                 </Box>
 
-                                {/* Debug section to view raw data */}
                                 <Divider sx={{ my: 2 }} />
                                 <Typography variant="subtitle2" color="text.secondary">Debug Data:</Typography>
                                 <Box sx={{

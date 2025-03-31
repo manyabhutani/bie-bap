@@ -70,6 +70,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.hashed_password):
         return None
+
     return user
 
 def get_all_users(db: Session) -> list:

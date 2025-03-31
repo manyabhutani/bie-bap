@@ -7,36 +7,14 @@ import {
     TextField,
     Button,
     Alert,
-    Grid,
     Typography,
     Container,
-    Drawer,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    AppBar,
-    Toolbar,
-    Divider,
     LinearProgress,
-    useTheme,
-    IconButton,
-    Tabs,
-    Tab
+    IconButton
 } from '@mui/material';
-import {
-    Person as PersonIcon,
-    Dashboard as DashboardIcon,
-    EventNote as EventIcon,
-    People as PeopleIcon,
-    Settings as SettingsIcon,
-    ExitToApp as LogoutIcon,
-    Edit as EditIcon,
-    Save as SaveIcon,
-    Business as BusinessIcon
-} from '@mui/icons-material';
+import { Edit as EditIcon, Save as SaveIcon } from '@mui/icons-material';
 import API from '../../../services/api';
-import { Link } from 'react-router-dom';
+
 const BG_IMAGE_URL = `${process.env.PUBLIC_URL}/bg2.jpg`;
 
 const OrganizerProfilePage = () => {
@@ -44,9 +22,6 @@ const OrganizerProfilePage = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [editMode, setEditMode] = useState(false);
-    const [tabValue, setTabValue] = useState(0);
-
-    const theme = useTheme();
 
     const fetchProfile = async () => {
         setLoading(true);
@@ -81,10 +56,6 @@ const OrganizerProfilePage = () => {
         }
     };
 
-    const handleTabChange = (event, newValue) => {
-        setTabValue(newValue);
-    };
-
     return (
         <Box
             sx={{
@@ -110,16 +81,75 @@ const OrganizerProfilePage = () => {
                         Organizer Profile
                     </Typography>
 
-                    {/* Error Alert */}
                     {error && (
                         <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
                             {error}
                         </Alert>
                     )}
+
+                    {loading && <LinearProgress sx={{ width: '100%', mb: 2 }} />}
+
+                    <Avatar sx={{ width: 80, height: 80, mb: 2 }} />
+
+                    <Card sx={{ width: '100%' }}>
+                        <CardContent>
+                            <TextField
+                                label="Organization Name"
+                                name="organization_name"
+                                value={profile.organization_name || ''}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                disabled={!editMode}
+                            />
+                            <TextField
+                                label="Phone"
+                                name="phone"
+                                value={profile.phone || ''}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                disabled={!editMode}
+                            />
+                            <TextField
+                                label="Description"
+                                name="description"
+                                value={profile.description || ''}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                disabled={!editMode}
+                            />
+                            <TextField
+                                label="address"
+                                name="address"
+                                value={profile.address || ''}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                disabled={!editMode}
+                            />
+
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                {editMode ? (
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<SaveIcon />}
+                                        onClick={handleUpdate}
+                                    >
+                                        Save
+                                    </Button>
+                                ) : (
+                                    <IconButton color="primary" onClick={() => setEditMode(true)}>
+                                        <EditIcon />
+                                    </IconButton>
+                                )}
+                            </Box>
+                        </CardContent>
+                    </Card>
                 </Box>
             </Container>
         </Box>
-
     );
 };
 

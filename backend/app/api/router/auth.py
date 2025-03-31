@@ -31,8 +31,12 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
     user = authenticate_user(db, credentials.email, credentials.password)
+
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+
+
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     refresh_token_expires = timedelta(minutes=settings.refresh_token_expire_minutes)
     access_token = create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
