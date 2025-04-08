@@ -1,4 +1,3 @@
-
 from sqlalchemy.orm import Session
 from app.db.models.user import User
 from app.db.models.volunteer import Volunteer
@@ -9,13 +8,17 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+
 ALLOWED_ROLES = {"volunteer", "organizer"}
+
 def create_user(db: Session, user_data: UserSignup) -> User:
     if user_data.role not in ALLOWED_ROLES:
         raise ValueError("Invalid role provided. Must be 'volunteer' or 'organizer'.")
@@ -66,6 +69,7 @@ def create_user(db: Session, user_data: UserSignup) -> User:
 
     return new_user
 
+
 def authenticate_user(db: Session, email: str, password: str) -> User:
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(password, user.hashed_password):
@@ -73,10 +77,12 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
 
     return user
 
+
 def get_all_users(db: Session) -> list:
     return db.query(User).all()
 
-def delete_user(db: Session , user_id : int) -> bool:
+
+def delete_user(db: Session, user_id: int) -> bool:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return False

@@ -7,3 +7,7 @@ def send_whatsapp_message(to, message):
         body=message,
         to=f"whatsapp:{to}"
     )
+
+
+
+#add notification for events and one for sending to everyone

@@ -20,7 +20,7 @@ import {
     Chip,
     Paper,
     IconButton,
-    Divider
+    Divider, Tooltip
 } from '@mui/material';
 import API from '../../../services/api';
 import {
@@ -30,7 +30,8 @@ import {
     Delete as DeleteIcon,
     Person as ProfileIcon,
     Schedule as ScheduleIcon,
-    LocationOn as LocationIcon
+    LocationOn as LocationIcon,
+    Doorbell as BellIcon
 } from '@mui/icons-material';
 import { format, parseISO } from 'date-fns';
 
@@ -197,6 +198,16 @@ const EventListPage = () => {
         `${volunteer.first_name} ${volunteer.last_name}`.toLowerCase().includes(searchQuery)
     );
 
+    const handleSendReminder = async (eventId) => {
+        try {
+            await API.post(`/events/${eventId}/send-reminder`);
+            alert('Reminder sent to all assigned volunteers!');
+        } catch (err) {
+            setError('Failed to send reminder.');
+        }
+    };
+
+
     return (
         <Container maxWidth="md" sx={{ mt: 4, p: 3 }}>
             <Typography variant="h4" gutterBottom textAlign="center" sx={{ mb: 4 }}>
@@ -265,11 +276,21 @@ const EventListPage = () => {
                                 </IconButton>
 
                                 <IconButton
-                                    color="secondary"
+                                    color="primary"
                                     onClick={() => handleOpenAssignDialog(event)}
                                 >
                                     <VolunteerIcon />
                                 </IconButton>
+
+                                <Tooltip title="Send Reminder">
+                                    <IconButton
+                                        color="primary"
+                                        onClick={() => handleSendReminder(event.id)}
+                                    >
+                                        <BellIcon />
+                                    </IconButton>
+                                </Tooltip>
+
                             </Box>
                         </Box>
 
@@ -480,7 +501,7 @@ const EventListPage = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenAssignDialog(false)}>Cancel</Button>
-                    <Button onClick={handleAssignVolunteers} variant="contained">Assign</Button>
+                    <Button onClick={handleAssignVolunteers} variant="contained">Confirm</Button>
                 </DialogActions>
             </Dialog>
 
