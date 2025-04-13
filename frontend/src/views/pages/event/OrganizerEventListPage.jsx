@@ -53,6 +53,10 @@ const EventListPage = () => {
     const [selectedVolunteers, setSelectedVolunteers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedVolunteerProfile, setSelectedVolunteerProfile] = useState(null);
+    const [openNotificationDialog, setOpenNotificationDialog] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [targetEventId, setTargetEventId] = useState(null);
+
 
     const formatDateTime = (dateTimeString) => {
         if (!dateTimeString) return '';
@@ -198,12 +202,19 @@ const EventListPage = () => {
         `${volunteer.first_name} ${volunteer.last_name}`.toLowerCase().includes(searchQuery)
     );
 
-    const handleSendReminder = async (eventId) => {
+    const handleOpenNotificationDialog = (eventId) => {
+        setTargetEventId(eventId);
+        setOpenNotificationDialog(true);
+    };
+
+    const handleSendCustomNotification = async () => {
         try {
-            await API.post(`/events/${eventId}/send-reminder`);
-            alert('Reminder sent to all assigned volunteers!');
+            await API.post(`/events/${targetEventId}/notify`, { message: notificationMessage });
+            alert('Custom message sent!');
+            setOpenNotificationDialog(false);
+            setNotificationMessage('');
         } catch (err) {
-            setError('Failed to send reminder.');
+            setError('Failed to send custom message.');
         }
     };
 
@@ -282,11 +293,8 @@ const EventListPage = () => {
                                     <VolunteerIcon />
                                 </IconButton>
 
-                                <Tooltip title="Send Reminder">
-                                    <IconButton
-                                        color="primary"
-                                        onClick={() => handleSendReminder(event.id)}
-                                    >
+                                <Tooltip title="Send Custom Notification">
+                                    <IconButton color="primary" onClick={() => handleOpenNotificationDialog(event.id)}>
                                         <BellIcon />
                                     </IconButton>
                                 </Tooltip>
@@ -532,6 +540,25 @@ const EventListPage = () => {
                     <Button onClick={() => setOpenProfileDialog(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog open={openNotificationDialog} onClose={() => setOpenNotificationDialog(false)} fullWidth maxWidth="sm">
+                <DialogTitle>Send Custom Notification</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Message"
+                        multiline
+                        rows={4}
+                        fullWidth
+                        value={notificationMessage}
+                        onChange={(e) => setNotificationMessage(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenNotificationDialog(false)}>Cancel</Button>
+                    <Button variant="contained" onClick={handleSendCustomNotification}>Send</Button>
+                </DialogActions>
+            </Dialog>
+
         </Container>
     );
 };

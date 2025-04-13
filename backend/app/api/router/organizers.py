@@ -36,6 +36,8 @@ def update_my_organizer_profile(
     if not updated_organizer:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Update failed")
     return updated_organizer
+
+
 @router.get("/{event_id}/volunteers", response_model=List[VolunteerRead])
 def get_event_volunteers(event_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     event = db.query(Event).filter(Event.id == event_id, Event.organizer_id == current_user.id).first()

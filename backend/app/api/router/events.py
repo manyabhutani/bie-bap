@@ -15,6 +15,10 @@ from app.services.event_service import assign_volunteers_to_event, get_assigned_
 
 from app.schemas.events import VolunteerAssignRequest
 
+from app.services.event_service import send_custom_message_to_event_volunteers
+
+from app.schemas.message import CustomNotificationRequest
+
 router = APIRouter()
 
 @router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
@@ -65,3 +69,8 @@ def assign_volunteers(
 @router.get("/volunteers/me/events", response_model=List[EventRead])
 def get_my_events(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     return get_assigned_events_for_volunteer(db, current_user.id)
+
+
+@router.post("/{event_id}/notify" )
+def notify_event_volunteers(event_id: int, req: CustomNotificationRequest, db: Session = Depends(get_db)):
+    return send_custom_message_to_event_volunteers(db, event_id, req.message)

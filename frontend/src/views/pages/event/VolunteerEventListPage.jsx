@@ -19,16 +19,49 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import API from '../../../services/api';
-import { format, parseISO } from "date-fns";
 
 const localizer = momentLocalizer(moment);
+
+const CustomToolbar = (toolbar) => {
+    const goToBack = () => {
+        toolbar.onNavigate('PREV');
+    };
+    const goToNext = () => {
+        toolbar.onNavigate('NEXT');
+    };
+    const goToCurrent = () => {
+        toolbar.onNavigate('TODAY');
+    };
+
+    return (
+        <div className="rbc-toolbar">
+            <div className="rbc-btn-group">
+                <Button variant="outlined" onClick={goToCurrent}>Today</Button>
+                <Button variant="outlined" onClick={goToBack}>Back</Button>
+                <Button variant="outlined" onClick={goToNext}>Next</Button>
+            </div>
+            <div className="rbc-toolbar-label">{toolbar.label}</div>
+            <div className="rbc-btn-group">
+                {toolbar.views.map(view => (
+                    <Button
+                        key={view}
+                        variant={toolbar.view === view ? "contained" : "outlined"}
+                        onClick={() => toolbar.onView(view)}
+                    >
+                        {view.charAt(0).toUpperCase() + view.slice(1)}
+                    </Button>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 const VolunteerEventListPage = () => {
     const [events, setEvents] = useState([]);
     const [error, setError] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
-
+    const [currentView, setCurrentView] = useState('week');
     useEffect(() => {
         fetchAssignedEvents();
     }, []);
@@ -38,15 +71,26 @@ const VolunteerEventListPage = () => {
             const res = await API.get('/volunteers/me/events');
             console.log("API Response:", res.data);
 
+            // Validate and transform events data
             const transformedEvents = res.data.map(event => {
-                console.log("Processing event:", event.start_time);
+                // Ensure dates are valid
+                const startDate = new Date(event.start_time);
+                const endDate = new Date(event.end_time);
+
+                // Validate dates
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    console.error("Invalid date for event:", event);
+                    return null;
+                }
+
                 return {
                     ...event,
-                    start: new Date(event.start_time),
-                    end: new Date(event.end_time),
-                    title: event.title
+                    start: startDate,
+                    end: endDate,
+                    title: event.title || 'Untitled Event',
+                    resource: event.id
                 };
-            });
+            }).filter(event => event !== null);
 
             setEvents(transformedEvents);
         } catch (err) {
@@ -83,6 +127,26 @@ const VolunteerEventListPage = () => {
         }
     };
 
+    const eventStyleGetter = (event) => {
+        return {
+            style: {
+                backgroundColor: '#3f51b5',
+                borderRadius: '4px',
+                color: 'white',
+                border: 'none',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+            }
+        };
+    };
+
+
+    const handleViewChange = (newView) => {
+        console.log("View changed to:", newView);
+        setCurrentView(newView);
+    };
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4, py: 3 }}>
             <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
@@ -102,8 +166,9 @@ const VolunteerEventListPage = () => {
                                 p: 2,
                                 mb: 2,
                                 borderRadius: 2,
-                                '&:hover': { boxShadow: 4 }
+                                '&:hover': { boxShadow: 4, cursor: 'pointer' }
                             }}
+                            onClick={() => handleEventClick(event)}
                         >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Avatar sx={{ bgcolor: 'primary.light' }}>
@@ -111,7 +176,7 @@ const VolunteerEventListPage = () => {
                                 </Avatar>
                                 <Box sx={{ flexGrow: 1 }}>
                                     <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                        {event.title || 'Untitled Event'}
+                                        {event.title}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
                                         {event.description || 'No description provided.'}
@@ -135,7 +200,10 @@ const VolunteerEventListPage = () => {
                                 <Button
                                     variant="outlined"
                                     size="small"
-                                    onClick={() => handleEventClick(event)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEventClick(event);
+                                    }}
                                 >
                                     Details
                                 </Button>
@@ -146,40 +214,55 @@ const VolunteerEventListPage = () => {
                     )}
                 </Grid>
 
+                {/* Calendar Column */}
                 <Grid item xs={12} md={5}>
-                    <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+                    <Paper elevation={3} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                             Event Calendar
                         </Typography>
-                        <Box sx={{ height: 400 }}>
+                        <Box
+                            sx={{
+                                height: 500,
+                                '& .rbc-calendar': {
+                                    borderRadius: 1,
+                                    border: '1px solid rgba(0, 0, 0, 0.12)'
+                                }
+                            }}
+                        >
                             <Calendar
                                 localizer={localizer}
                                 events={events}
                                 startAccessor="start"
                                 endAccessor="end"
                                 titleAccessor="title"
-                                defaultView="month"
-                                views={['month']}
+                                view={currentView}
+                                onView={handleViewChange}
+                                defaultView="week"
+                                views={['month', 'week', 'day', 'agenda']}
                                 onSelectEvent={handleEventClick}
-                                style={{ height: 400 }}
-                                eventPropGetter={(event) => ({
-                                    style: {
-                                        backgroundColor: '#3f51b5',
-                                        borderRadius: '4px',
-                                        color: 'white'
-                                    }
-                                })}
+                                style={{ height: 500 }}
+                                eventPropGetter={eventStyleGetter}
+                                components={{
+                                    toolbar: CustomToolbar
+                                }}
+                                onNavigate={(date, view) => console.log("Navigated to:", date, view)}
                             />
                         </Box>
                     </Paper>
                 </Grid>
             </Grid>
 
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+            {/* Event Details Dialog */}
+            <Dialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
                 {selectedEvent ? (
                     <>
                         <DialogTitle sx={{ fontWeight: 'bold' }}>
-                            {selectedEvent.title || 'Event Details'}
+                            {selectedEvent.title}
                         </DialogTitle>
                         <DialogContent>
                             <Box sx={{ py: 1 }}>
@@ -202,20 +285,6 @@ const VolunteerEventListPage = () => {
                                     <Typography>
                                         <strong>Location:</strong> {selectedEvent.location || 'No location specified'}
                                     </Typography>
-                                </Box>
-
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="subtitle2" color="text.secondary">Debug Data:</Typography>
-                                <Box sx={{
-                                    mt: 1,
-                                    p: 1,
-                                    bgcolor: 'grey.100',
-                                    borderRadius: 1,
-                                    fontSize: '0.75rem',
-                                    fontFamily: 'monospace',
-                                    overflowX: 'auto'
-                                }}>
-                                    <pre>{JSON.stringify(selectedEvent, null, 2)}</pre>
                                 </Box>
 
                                 {selectedEvent.volunteers && selectedEvent.volunteers.length > 0 && (

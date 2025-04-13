@@ -1,11 +1,10 @@
-
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.db.models.event import Event
-from app.schemas.events import EventCreate , EventUpdate
+from app.schemas.events import EventCreate, EventUpdate
 
 from app.db.models.associations import volunteer_events
-from  app.db.models.volunteer import Volunteer
+from app.db.models.volunteer import Volunteer
 
 from app.services.whatsapp_service import send_whatsapp_message
 
@@ -26,11 +25,14 @@ def create_event(db: Session, event_data: EventCreate, organizer_id: int) -> Eve
     db.refresh(new_event)
     return new_event
 
+
 def get_all_events(db: Session) -> List[Event]:
     return db.query(Event).all()
 
+
 def get_event_by_id(db: Session, event_id: int) -> Optional[Event]:
     return db.query(Event).filter(Event.id == event_id).first()
+
 
 def update_event(db: Session, event_id: int, event_data: EventUpdate) -> Optional[Event]:
     event = get_event_by_id(db, event_id)
@@ -43,6 +45,7 @@ def update_event(db: Session, event_id: int, event_data: EventUpdate) -> Optiona
     db.commit()
     db.refresh(event)
     return event
+
 
 def delete_event(db: Session, event_id: int) -> bool:
     event = get_event_by_id(db, event_id)
@@ -64,7 +67,6 @@ def get_event_volunteers(db: Session, event_id: int):
     return [{"id": v.id, "name": f"{v.first_name} {v.last_name}", "status": v.status} for v in results]
 
 
-
 def assign_volunteers_to_event(db: Session, event_id: int, volunteer_ids: List[int]):
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
@@ -78,7 +80,7 @@ def assign_volunteers_to_event(db: Session, event_id: int, volunteer_ids: List[i
     db.commit()
     db.refresh(event)
 
-    #whatsap notification
+    # whatsap notification
 
     for volunteer in volunteers:
         message = (
@@ -86,11 +88,27 @@ def assign_volunteers_to_event(db: Session, event_id: int, volunteer_ids: List[i
             f"You have been assigned to the event: {event.title}\n"
             # f"Date: {event.date} at {event.time}\n"
             f"Location: {event.location}\n"
-            "Please confirm your availability."
+            "Please check the FSCZ Volunteer web-application."
         )
         send_whatsapp_message(volunteer.phone, message)
 
     return event, None
+
+
+def send_custom_message_to_event_volunteers(db: Session, event_id: int, message: str):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        return None, "Event not found"
+
+    volunteers = db.query(Volunteer).join(volunteer_events).filter(volunteer_events.c.event_id == event_id).all()
+
+    if not volunteers:
+        return None, "Some volunteer IDs are invalid"
+
+    for volunteer in volunteers:
+        send_whatsapp_message(volunteer.phone, message)
+
+    return {"detail": f"Message sent to {len(volunteers)} volunteer(s)."}
 
 
 def get_assigned_events_for_volunteer(db: Session, volunteer_id: int):
