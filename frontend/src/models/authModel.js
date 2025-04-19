@@ -25,7 +25,7 @@ class AuthModel {
         } catch (error) {
             console.error('Login error:', error);
             throw error;
-        }l
+        }
     }
 
     async signup(userData) {
