@@ -21,10 +21,7 @@ def update_volunteer(db: Session, volunteer_id: int, update_data: VolunteerUpdat
     return volunteer
 
 
-
-
 def register_volunteer_for_event(db: Session, volunteer_id: int, event_id: int) -> dict:
-
     event = db.query(Event).filter(Event.id == event_id).first()
     if not event:
         return {"error": "Event not found"}
@@ -38,15 +35,15 @@ def register_volunteer_for_event(db: Session, volunteer_id: int, event_id: int) 
     db.refresh(event)
     return {"message": "Volunteer registered successfully", "event_id": event.id, "volunteer_id": volunteer.id}
 
+
 def get_volunteer_events(db: Session, volunteer_id: int):
     results = (
-        db.query(Event.id, Event.title, Event.description, Event.start_time, Event.location, volunteer_events.c.status , Event.end_time)
+        db.query(Event.id, Event.title, Event.description, Event.start_time, Event.location, volunteer_events.c.status,
+                 Event.end_time)
         .join(volunteer_events, Event.id == volunteer_events.c.event_id)
         .filter(volunteer_events.c.volunteer_id == volunteer_id)
         .all()
     )
-    print(results)
-
     return [
         {
             "id": r.id,
@@ -59,3 +56,11 @@ def get_volunteer_events(db: Session, volunteer_id: int):
         }
         for r in results
     ]
+
+def delete_volunteer(db: Session, volunteer_id: int):
+    volunteer = db.query(Volunteer).filter(Volunteer.id == volunteer_id).first()
+    if not volunteer:
+        return None
+    db.delete(volunteer)
+    db.commit()
+    return volunteer
