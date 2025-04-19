@@ -61,6 +61,9 @@ def delete_volunteer(db: Session, volunteer_id: int):
     volunteer = db.query(Volunteer).filter(Volunteer.id == volunteer_id).first()
     if not volunteer:
         return None
+    user = volunteer.user
     db.delete(volunteer)
+    if user:
+        db.delete(user)
     db.commit()
     return volunteer

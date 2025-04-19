@@ -19,6 +19,8 @@ from app.services.event_service import send_custom_message_to_event_volunteers
 
 from app.schemas.message import CustomNotificationRequest
 
+from app.services.event_service import send_reminders_to_all_events
+
 router = APIRouter()
 
 @router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
@@ -74,3 +76,11 @@ def get_my_events(db: Session = Depends(get_db), current_user=Depends(get_curren
 @router.post("/{event_id}/notify" )
 def notify_event_volunteers(event_id: int, req: CustomNotificationRequest, db: Session = Depends(get_db)):
     return send_custom_message_to_event_volunteers(db, event_id, req.message)
+@router.post("/notify_all")
+def notify_all_events(db: Session = Depends(get_db)):
+    result = send_reminders_to_all_events(db)
+
+    if not result["success_count"]:
+        raise HTTPException(status_code=400, detail="No reminders were sent.")
+
+    return result

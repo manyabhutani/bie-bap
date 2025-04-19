@@ -110,6 +110,29 @@ def send_custom_message_to_event_volunteers(db: Session, event_id: int, message:
 
     return {"detail": f"Message sent to {len(volunteers)} volunteer(s)."}
 
+def send_reminders_to_all_events(db: Session):
+    events = db.query(Event).all()
+    reminder_template = "📢 Reminder: You are assigned to '{event_name}' on {event_date}."
+
+    success_count = 0
+    failures = []
+
+    for event in events:
+        message = reminder_template.format(
+            event_name=event.title,
+            event_date=event.start_time.strftime('%Y-%m-%d') if event.start_time else 'TBA'
+        )
+        try:
+            send_custom_message_to_event_volunteers(db, event.id, message)
+            success_count += 1
+        except Exception as e:
+            failures.append((event.id, str(e)))
+
+    return {
+        "success_count": success_count,
+        "failures": failures
+    }
+
 
 def get_assigned_events_for_volunteer(db: Session, volunteer_id: int):
     return db.query(Event).join(volunteer_events).filter(volunteer_events.c.volunteer_id == volunteer_id).all()

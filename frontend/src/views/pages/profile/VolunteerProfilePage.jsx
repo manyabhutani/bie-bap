@@ -44,6 +44,23 @@ const VolunteerProfilePage = () => {
     const handleChange = (e) => {
         setProfile({ ...profile, [e.target.name]: e.target.value });
     };
+    const handleDeleteProfile = async () => {
+        if (!window.confirm('Are you sure you want to delete your profile? This action cannot be undone.')) return;
+
+        setLoading(true);
+        try {
+            await API.delete('/volunteers/me');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userRole');
+
+            window.location.href = '/signup';
+        } catch (err) {
+            setError(err.response?.data?.detail || 'Error deleting profile');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -58,8 +75,16 @@ const VolunteerProfilePage = () => {
         }
     };
 
-    const nationalityOptions = ['USA', 'Canada', 'India', 'Germany', 'Brazil'];
-    const languageOptions = ['English', 'Spanish', 'French', 'German', 'Hindi'];
+    const nationalityOptions = [
+        'Argentina', 'Australia', 'Bangladesh', 'Brazil','Canada', 'China', 'Czech Republic', 'Egypt', 'France',
+        'Germany', 'Hungary', 'India', 'Indonesia', 'Italy', 'Japan', 'Mexico', 'Netherlands', 'Nigeria', 'Norway', 'Pakistan', 'Philippines', 'Poland', 'Russia', 'Slovakia',
+        'South Africa', 'South Korea', 'Spain', 'Sweden', 'Turkey', 'Ukraine', 'United Kingdom', 'USA'
+    ];
+    const languageOptions = [
+        'Arabic', 'Czech', 'Dutch', 'English', 'French', 'German', 'Hindi', 'Hungarian', 'Italian', 'Japanese', 'Korean', 'Mandarin', 'Persian',
+        'Polish', 'Portuguese', 'Romanian', 'Russian', 'Slovak', 'Spanish', 'Swedish', 'Turkish', 'Ukrainian', 'Vietnamese'
+    ];
+
 
     const handleLanguageChange = (event) => {
         const {
@@ -151,7 +176,6 @@ const VolunteerProfilePage = () => {
                                     {error}
                                 </Alert>
                             )}
-
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
                                     <TextField
@@ -254,6 +278,18 @@ const VolunteerProfilePage = () => {
                                         {loading ? <CircularProgress size={24} /> : 'UPDATE PROFILE'}
                                     </Button>
                                 </Grid>
+                                <Grid item xs={12}>
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        sx={{ mt: 2, py: 1.5, fontSize: '1rem' }}
+                                        onClick={handleDeleteProfile}
+                                        fullWidth
+                                    >
+                                        DELETE PROFILE
+                                    </Button>
+                                </Grid>
+
                             </Grid>
                         </Box>
                     </Grid>

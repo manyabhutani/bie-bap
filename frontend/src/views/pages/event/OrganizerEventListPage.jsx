@@ -217,6 +217,19 @@ const EventListPage = () => {
             setError('Failed to send custom message.');
         }
     };
+    const handleSendRemindersToAll = async () => {
+        try {
+            const confirm = window.confirm("Are you sure you want to send WhatsApp reminders for all events?");
+            if (!confirm) return;
+
+            await API.post(`/events/notify_all`);
+            alert("Reminders sent to all event groups!");
+        } catch (err) {
+            console.error(err);
+            setError("Failed to send reminders to all events.");
+        }
+    };
+
 
 
     return (
@@ -237,6 +250,16 @@ const EventListPage = () => {
             >
                 Create New Event
             </Button>
+            <Button
+                variant="outlined"
+                color="secondary"
+                sx={{ mb: 3, ml: 2 }}
+                startIcon={<BellIcon />}
+                onClick={handleSendRemindersToAll}
+            >
+                Send WhatsApp Reminders to All Events
+            </Button>
+
 
             <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {events.map((event) => (
