@@ -2,7 +2,8 @@ from twilio.rest import Client
 import os
 from dotenv import load_dotenv
 
-load_dotenv("app/.env")
+if os.environ.get("RENDER") != "true":
+    load_dotenv("app/.env")
 
 AUTH_TOKEN = os.getenv("WHATSAPP_AUTH")
 USERNAME = os.getenv("WHATSAPP_USERNAME")

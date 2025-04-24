@@ -17,9 +17,6 @@ services:
       context: ./backend
     env_file:
       - ./backend/app/.env
-    environment:
-      - DATABASE_URL=postgresql://volunteer_user:user@db:5432/volunteer_db
-      - ALGORITHM=HS256
     depends_on:
       - db
     ports:
