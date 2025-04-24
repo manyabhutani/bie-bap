@@ -1,4 +1,4 @@
-version: '3.9'
+
 
 services:
   db:
@@ -15,9 +15,10 @@ services:
   backend:
     build:
       context: ./backend
+    env_file:
+      - ./backend/app/.env
     environment:
       - DATABASE_URL=postgresql://volunteer_user:user@db:5432/volunteer_db
-      - SECRET_KEY=your_secret_key
       - ALGORITHM=HS256
     depends_on:
       - db

@@ -1,13 +1,17 @@
 from twilio.rest import Client
+import os
+from dotenv import load_dotenv
+
+load_dotenv("app/.env")
+
+AUTH_TOKEN = os.getenv("WHATSAPP_AUTH")
+USERNAME = os.getenv("WHATSAPP_USERNAME")
+
 
 def send_whatsapp_message(to, message):
-    client = Client('ACa5c73d0b23740399e41c3c634c05f78a', 'ccbff0a375f653fb297ccf0c08a4eda9')
+    client = Client(USERNAME, AUTH_TOKEN)
     client.messages.create(
         from_="whatsapp:+14155238886",
         body=message,
         to=f"whatsapp:{to}"
     )
-
-
-
-#add notification for events and one for sending to everyone
