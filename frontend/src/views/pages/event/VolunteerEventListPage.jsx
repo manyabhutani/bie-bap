@@ -22,31 +22,111 @@ import API from '../../../services/api';
 
 const localizer = momentLocalizer(moment);
 
+//this calender view creates better ui
 const CustomToolbar = (toolbar) => {
     return (
-        <div className="rbc-toolbar">
-            <div className="rbc-toolbar-label">{toolbar.label}</div>
-            <div className="rbc-btn-group">
-                {toolbar.views.map(view => (
-                    <Button
-                        key={view}
-                        variant={toolbar.view === view ? "contained" : "outlined"}
-                        onClick={() => toolbar.onView(view)}
-                    >
-                        {view.charAt(0).toUpperCase() + view.slice(1)}
-                    </Button>
-                ))}
+        <div className="rbc-toolbar" style={{ marginBottom: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                {/* Navigation Row */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '10px'
+                }}>
+                    {/* Navigation Buttons */}
+                    <div style={{
+                        display: 'flex',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '4px',
+                        overflow: 'hidden'
+                    }}>
+                        <Button
+                            variant="text"
+                            style={{
+                                borderRadius: 0,
+                                padding: '8px 16px',
+                                borderRight: '1px solid #e0e0e0'
+                            }}
+                            onClick={() => toolbar.onNavigate('PREV')}
+                        >
+                            BACK
+                        </Button>
+                        <Button
+                            variant="text"
+                            style={{
+                                borderRadius: 0,
+                                padding: '8px 16px',
+                                borderRight: '1px solid #e0e0e0'
+                            }}
+                            onClick={() => toolbar.onNavigate('TODAY')}
+                        >
+                            TODAY
+                        </Button>
+                        <Button
+                            variant="text"
+                            style={{
+                                borderRadius: 0,
+                                padding: '8px 16px'
+                            }}
+                            onClick={() => toolbar.onNavigate('NEXT')}
+                        >
+                            NEXT
+                        </Button>
+                    </div>
+
+                    {/* Date Range Label */}
+                    <div className="rbc-toolbar-label" style={{
+                        fontSize: '1.2rem',
+                        fontWeight: 500
+                    }}>
+                        {toolbar.label}
+                    </div>
+                </div>
+
+                {/* View Selection Row */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginBottom: '5px'
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '4px',
+                        overflow: 'hidden'
+                    }}>
+                        {toolbar.views.map(view => (
+                            <Button
+                                key={view}
+                                variant={toolbar.view === view ? "contained" : "text"}
+                                style={{
+                                    borderRadius: 0,
+                                    padding: '8px 16px',
+                                    backgroundColor: toolbar.view === view ? '#b94747' : 'transparent',
+                                    color: '#000',
+                                    boxShadow: 'none',
+                                    borderRight: view !== toolbar.views[toolbar.views.length-1] ? '1px solid #e0e0e0' : 'none'
+                                }}
+                                onClick={() => toolbar.onView(view)}
+                            >
+                                {view.toUpperCase()}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
-
 const VolunteerEventListPage = () => {
     const [events, setEvents] = useState([]);
     const [error, setError] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [currentView, setCurrentView] = useState('week');
+    const [currentDate, setCurrentDate] = useState(new Date());
+
     useEffect(() => {
         fetchAssignedEvents();
     }, []);
@@ -122,10 +202,14 @@ const VolunteerEventListPage = () => {
         };
     };
 
-
     const handleViewChange = (newView) => {
         console.log("View changed to:", newView);
         setCurrentView(newView);
+    };
+
+    const handleNavigate = (newDate) => {
+        console.log("Navigated to:", newDate);
+        setCurrentDate(newDate);
     };
 
     return (
@@ -218,6 +302,8 @@ const VolunteerEventListPage = () => {
                                 titleAccessor="title"
                                 view={currentView}
                                 onView={handleViewChange}
+                                date={currentDate}
+                                onNavigate={handleNavigate}
                                 defaultView="week"
                                 views={['month', 'week', 'day', 'agenda']}
                                 onSelectEvent={handleEventClick}
@@ -226,7 +312,6 @@ const VolunteerEventListPage = () => {
                                 components={{
                                     toolbar: CustomToolbar
                                 }}
-                                onNavigate={(date, view) => console.log("Navigated to:", date, view)}
                             />
                         </Box>
                     </Paper>
