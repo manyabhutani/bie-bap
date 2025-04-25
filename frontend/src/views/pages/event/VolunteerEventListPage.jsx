@@ -23,23 +23,8 @@ import API from '../../../services/api';
 const localizer = momentLocalizer(moment);
 
 const CustomToolbar = (toolbar) => {
-    const goToBack = () => {
-        toolbar.onNavigate('PREV');
-    };
-    const goToNext = () => {
-        toolbar.onNavigate('NEXT');
-    };
-    const goToCurrent = () => {
-        toolbar.onNavigate('TODAY');
-    };
-
     return (
         <div className="rbc-toolbar">
-            <div className="rbc-btn-group">
-                <Button variant="outlined" onClick={goToCurrent}>Today</Button>
-                <Button variant="outlined" onClick={goToBack}>Back</Button>
-                <Button variant="outlined" onClick={goToNext}>Next</Button>
-            </div>
             <div className="rbc-toolbar-label">{toolbar.label}</div>
             <div className="rbc-btn-group">
                 {toolbar.views.map(view => (
@@ -71,13 +56,10 @@ const VolunteerEventListPage = () => {
             const res = await API.get('/volunteers/me/events');
             console.log("API Response:", res.data);
 
-            // Validate and transform events data
             const transformedEvents = res.data.map(event => {
-                // Ensure dates are valid
                 const startDate = new Date(event.start_time);
                 const endDate = new Date(event.end_time);
 
-                // Validate dates
                 if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
                     console.error("Invalid date for event:", event);
                     return null;
@@ -108,7 +90,6 @@ const VolunteerEventListPage = () => {
     const formatDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'N/A';
         try {
-            // Try to parse as ISO date
             const date = new Date(dateTimeString);
             if (isNaN(date.getTime())) {
                 console.error("Invalid date:", dateTimeString);
