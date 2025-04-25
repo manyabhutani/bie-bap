@@ -103,7 +103,7 @@ const CustomToolbar = (toolbar) => {
                                 style={{
                                     borderRadius: 0,
                                     padding: '8px 16px',
-                                    backgroundColor: toolbar.view === view ? '#b94747' : 'transparent',
+                                    backgroundColor: toolbar.view === view ? '#8d7878' : 'transparent',
                                     color: '#000',
                                     boxShadow: 'none',
                                     borderRight: view !== toolbar.views[toolbar.views.length-1] ? '1px solid #e0e0e0' : 'none'
@@ -191,7 +191,7 @@ const VolunteerEventListPage = () => {
     const eventStyleGetter = (event) => {
         return {
             style: {
-                backgroundColor: '#3f51b5',
+                backgroundColor: '#c91414',
                 borderRadius: '4px',
                 color: 'white',
                 border: 'none',
@@ -352,21 +352,6 @@ const VolunteerEventListPage = () => {
                                         <strong>Location:</strong> {selectedEvent.location || 'No location specified'}
                                     </Typography>
                                 </Box>
-
-                                {selectedEvent.volunteers && selectedEvent.volunteers.length > 0 && (
-                                    <>
-                                        <Divider sx={{ my: 1 }} />
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 2 }}>
-                                            Other Volunteers:
-                                        </Typography>
-                                        {selectedEvent.volunteers.map(volunteer => (
-                                            <Typography key={volunteer.id || Math.random()} variant="body2">
-                                                {volunteer.first_name} {volunteer.last_name}
-                                                {volunteer.nationality ? ` (${volunteer.nationality})` : ''}
-                                            </Typography>
-                                        ))}
-                                    </>
-                                )}
                             </Box>
                         </DialogContent>
                         <DialogActions>
