@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 //docker
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = 'https://volunteer-backend-xwn1.onrender.com';
 
 const API = axios.create({
     baseURL: API_URL,
