@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-//docker
+//render
 const API_URL = 'https://volunteer-backend-xwn1.onrender.com';
 
 const API = axios.create({
